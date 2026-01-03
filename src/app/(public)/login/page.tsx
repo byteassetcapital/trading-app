@@ -14,7 +14,7 @@ export default function Login() {
       <style jsx>{`
         .login-wrapper {
           min-height: 100vh;
-          width: 100vw;
+          width: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -23,7 +23,7 @@ export default function Login() {
           overflow: hidden;
         }
       `}</style>
-    </div>
+    </div >
   );
 }
 

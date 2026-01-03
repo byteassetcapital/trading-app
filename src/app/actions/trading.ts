@@ -124,7 +124,15 @@ export async function getQuickStats(accessToken: string, filterAsset?: string): 
             const isTestnet = String(conn.is_testnet) === 'true' || conn.is_testnet === true;
 
             try {
-                const exchange = new ccxt.binance({ apiKey, secret, options: { defaultType: 'future' } });
+                const exchange = new ccxt.binance({
+                    apiKey,
+                    secret,
+                    enableRateLimit: true,
+                    options: {
+                        defaultType: 'future',
+                        recvWindow: 10000
+                    }
+                });
                 if (isTestnet) exchange.setSandboxMode(true);
 
                 try { await exchange.loadMarkets(); } catch { }
@@ -183,7 +191,15 @@ export async function getRecentTrades(accessToken: string): Promise<TradeItem[]>
             const isTestnet = String(conn.is_testnet) === 'true' || conn.is_testnet === true;
 
             try {
-                const exchange = new ccxt.binance({ apiKey, secret, options: { defaultType: 'future' } });
+                const exchange = new ccxt.binance({
+                    apiKey,
+                    secret,
+                    enableRateLimit: true,
+                    options: {
+                        defaultType: 'future',
+                        recvWindow: 10000
+                    }
+                });
                 if (isTestnet) exchange.setSandboxMode(true);
                 try { await exchange.loadMarkets(); } catch { }
 
@@ -246,7 +262,15 @@ export async function getAccountData(accessToken: string): Promise<AccountData |
             const isTestnet = String(conn.is_testnet) === 'true' || conn.is_testnet === true;
 
             try {
-                const exchange = new ccxt.binance({ apiKey, secret, options: { defaultType: 'future' } });
+                const exchange = new ccxt.binance({
+                    apiKey,
+                    secret,
+                    enableRateLimit: true,
+                    options: {
+                        defaultType: 'future',
+                        recvWindow: 10000
+                    }
+                });
                 if (isTestnet) exchange.setSandboxMode(true);
 
                 // Balance
@@ -322,7 +346,15 @@ export async function getOpenOrders(accessToken: string): Promise<OrderItem[]> {
             const isTestnet = String(conn.is_testnet) === 'true' || conn.is_testnet === true;
 
             try {
-                const exchange = new ccxt.binance({ apiKey, secret, options: { defaultType: 'future' } });
+                const exchange = new ccxt.binance({
+                    apiKey,
+                    secret,
+                    enableRateLimit: true,
+                    options: {
+                        defaultType: 'future',
+                        recvWindow: 10000
+                    }
+                });
                 if (isTestnet) exchange.setSandboxMode(true);
 
                 // Load markets is crucial for symbol mapping
@@ -415,7 +447,15 @@ export async function getRealizedPnLStats(accessToken: string): Promise<Realized
             const isTestnet = String(conn.is_testnet) === 'true' || conn.is_testnet === true;
 
             try {
-                const exchange = new ccxt.binance({ apiKey, secret, options: { defaultType: 'future' } });
+                const exchange = new ccxt.binance({
+                    apiKey,
+                    secret,
+                    enableRateLimit: true,
+                    options: {
+                        defaultType: 'future',
+                        recvWindow: 10000
+                    }
+                });
                 if (isTestnet) exchange.setSandboxMode(true);
                 try { await exchange.loadMarkets(); } catch { }
 
@@ -472,7 +512,15 @@ export async function getPortfolioHistory(accessToken: string, timeframe: string
             const isTestnet = String(conn.is_testnet) === 'true' || conn.is_testnet === true;
 
             try {
-                const exchange = new ccxt.binance({ apiKey, secret, options: { defaultType: 'future' } });
+                const exchange = new ccxt.binance({
+                    apiKey,
+                    secret,
+                    enableRateLimit: true,
+                    options: {
+                        defaultType: 'future',
+                        recvWindow: 10000
+                    }
+                });
                 if (isTestnet) exchange.setSandboxMode(true);
 
                 // A. Fetch Current Balance
@@ -601,7 +649,15 @@ export async function getBinanceUserStreamKey(accessToken: string): Promise<{ li
             try {
                 // We use CCXT to leverage the existing configuration logic, 
                 // but specifically call the Futures ListenKey endpoint.
-                const exchange = new ccxt.binance({ apiKey, secret, options: { defaultType: 'future' } });
+                const exchange = new ccxt.binance({
+                    apiKey,
+                    secret,
+                    enableRateLimit: true,
+                    options: {
+                        defaultType: 'future',
+                        recvWindow: 10000
+                    }
+                });
                 if (isTestnet) exchange.setSandboxMode(true);
 
                 // Usually for Futures it is fapiPrivatePostListenKey

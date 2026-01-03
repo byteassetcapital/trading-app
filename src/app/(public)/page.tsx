@@ -350,6 +350,7 @@ export default function Home() {
   width: 100%;
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden;
   background-color: #0D0105;
   
   /* Zvýrazněné gradienty pro lepší viditelnost */
@@ -421,6 +422,7 @@ export default function Home() {
         .section-screen {
           min-height: 100vh;
           width: 100%;
+          overflow-x: hidden;
           display: flex;
           flex-direction: column;
           align-items: center;
