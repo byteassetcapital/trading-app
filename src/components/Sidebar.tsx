@@ -78,6 +78,14 @@ export default function Sidebar() {
                         <SettingsIcon />
                         <span>Settings</span>
                     </Link>
+
+                    <Link
+                        href="/"
+                        className={`${styles.navLink} ${pathname.startsWith('/') ? styles.activeLink : ''}`}
+                    >
+                        <SettingsIcon />
+                        <span>Home</span>
+                    </Link>
                 </nav>
 
                 <button onClick={handleLogout} className={styles.logoutBtn}>
