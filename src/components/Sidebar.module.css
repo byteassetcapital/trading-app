@@ -1,0 +1,170 @@
+.sidebarContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    background: linear-gradient(180deg, #130307 0%, #0D0105 100%);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 2rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.8);
+    border-right: 1px solid rgba(149, 77, 95, 0.2);
+}
+
+.sidebarOpen {
+    transform: translateX(0);
+}
+
+/* Nový wrapper pro logo a křížek pro perfektní zarovnání */
+.logoSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 3.5rem;
+}
+
+.brandName {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-shadow: 0 0 15px rgba(228, 158, 172, 0.3);
+}
+
+.closeBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--pink-mist);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.closeBtn:hover {
+    background: rgba(149, 77, 95, 0.3);
+    color: white;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    flex: 1;
+}
+
+.navLink {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.85rem 1.25rem;
+    border-radius: 14px;
+    color: rgba(228, 158, 172, 0.5);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.navLink:hover {
+    background: rgba(149, 77, 95, 0.15);
+    color: #ffffff;
+    transform: translateX(5px);
+}
+
+.activeLink {
+    background: rgba(149, 77, 95, 0.25) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(228, 158, 172, 0.2);
+    position: relative;
+}
+
+.activeLink::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 25%;
+    height: 50%;
+    width: 3px;
+    background: var(--pink-mist);
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 0 10px var(--pink-mist);
+}
+
+.logoutBtn {
+    margin-top: auto;
+    background: rgba(149, 77, 95, 0.15);
+    border: 1px solid rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    padding: 1rem;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Vycentrovaný obsah */
+    gap: 0.75rem;
+    transition: all 0.3s;
+}
+
+.logoutBtn:hover {
+    background: #ff6b6b;
+    color: white;
+    box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);
+}
+
+.mobileHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.1rem 1.5rem;
+    background: rgba(13, 1, 5, 0.95);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(149, 77, 95, 0.2);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 95;
+    backdrop-filter: blur(4px);
+}
+
+@media (min-width: 768px) {
+    .sidebarContainer {
+        transform: translateX(0);
+        width: 260px;
+    }
+
+    .mobileHeader {
+        display: none;
+    }
+
+    .overlay {
+        display: none;
+        /* No overlay on desktop */
+    }
+
+    .closeBtn {
+        display: none;
+    }
+}

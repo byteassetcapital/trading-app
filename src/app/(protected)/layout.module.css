@@ -1,0 +1,22 @@
+.protectedLayout {
+    display: flex;
+    min-height: 100vh;
+    background: var(--background);
+}
+
+.mainContent {
+    flex: 1;
+    width: 100%;
+    padding-top: 60px;
+    /* Space for mobile header */
+    padding-left: 0;
+    transition: padding-left 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .mainContent {
+        padding-left: 260px;
+        /* Sidebar width */
+        padding-top: 0;
+    }
+}

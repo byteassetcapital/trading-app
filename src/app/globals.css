@@ -1,0 +1,246 @@
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --font-main: 'Poppins', sans-serif;
+
+  /* New Color Palette */
+  --rich-mahogany: #2D0A10;
+  --rosewood: #954D5F;
+  --night-bordeaux: #46212C;
+  --coffee-bean: #130307;
+  --pink-mist: #E49EAC;
+  --background: #0D0105;
+
+}
+
+html,
+body {
+  overflow-x: hidden;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--accent-blue);
+}
+
+/* Utilities */
+
+.h1 {
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.subtitle2 {
+  font-size: clamp(1rem, 4vw, 1rem);
+  color: #b0b0b0;
+  max-width: 400px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.glass-panel {
+  /* 1. Mírně světlejší pozadí, aby se oddělilo od černé */
+  background: rgba(255, 255, 255, 0.03);
+
+  /* 2. Extrémní rozmazání pro "mléčný" efekt */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  /* 3. Dvojitý okraj: vnější linka + vnitřní odlesk */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    /* Vnější stín pro hloubku */
+    0 10px 30px rgba(0, 0, 0, 0.5),
+    /* VNITŘNÍ ZÁŘE (Klíč pro tmavé pozadí) */
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 0 20px rgba(255, 255, 255, 0.02);
+
+  border-radius: 20px;
+  padding: 2rem;
+
+  /* 4. Přidání gradientu do pozadí samotného panelu */
+  background-image: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0) 100%);
+}
+
+.glow-text {
+  text-shadow: 0 0 20px var(--primary-purple-glow);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent-blue), var(--primary-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btnPrimary {
+  /* Přechod z hluboké Bordeaux do elegantní Rosewood */
+  background: linear-gradient(135deg, var(--night-bordeaux) 0%, var(--rosewood) 100%);
+  color: #ffffff;
+  padding: 0.8rem 2.2rem;
+  border-radius: 50px;
+  border: 1px solid rgba(228, 158, 172, 0.4);
+  /* Jemná linka v Pink Mist */
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Decentní stín místo silné záře */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4),
+    inset 0 0 10px rgba(228, 158, 172, 0.1);
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  /* Záře se změní na jemný růžový opar */
+  box-shadow: 0 8px 25px rgba(149, 77, 95, 0.4);
+  filter: brightness(1.1);
+}
+
+.btnSecondary {
+  background: rgba(228, 158, 172, 0.05);
+  /* Skoro neznatelný nádech Pink Mist */
+  border: 1px solid rgba(228, 158, 172, 0.25);
+  color: var(--pink-mist);
+  padding: 0.8rem 2.2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.btnSecondary:hover {
+  background: rgba(149, 77, 95, 0.2);
+  /* Jemné vyplnění při najetí */
+  border-color: var(--pink-mist);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(149, 77, 95, 0.2);
+}
+
+/* Background Gradients */
+.bg-gradient-spot {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--primary-purple-glow) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0.4;
+  animation: pulse 10s infinite alternate;
+}
+
+.bg-spot-1 {
+  top: -200px;
+  left: -100px;
+}
+
+.bg-spot-2 {
+  bottom: -200px;
+  right: -100px;
+  background: radial-gradient(circle, var(--accent-blue-glow) 0%, transparent 70%);
+}
+
+
+.scroll-arrow {
+  animation: bounce 2s infinite;
+}
+
+
+
+.btn1 {
+  /* Mírně sytější pozadí, aby se oddělilo od podkladu */
+  background: rgba(149, 77, 95, 0.15);
+  color: var(--pink-mist);
+
+  border-radius: 50px;
+
+  /* Výraznější ohraničení s jemným gradientem */
+  border: 1px solid rgba(228, 158, 172, 0.4);
+
+  padding: 14px 40px;
+  font-weight: 600;
+  /* Vrátíme střední tučnost pro lepší čitelnost */
+  cursor: pointer;
+  font-size: 1.0rem;
+  letter-spacing: 1.2px;
+
+  display: block;
+  margin: 0 auto;
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+
+  /* JEMNÉ ZVÝRAZNĚNÍ: Vnitřní stín vytváří dojem hloubky skla */
+  box-shadow: inset 0 0 10px rgba(228, 158, 172, 0.1);
+}
+
+.btn1:hover {
+  /* Při najetí se celé tlačítko jemně "rozsvítí" */
+  background: rgba(149, 77, 95, 0.3);
+  border-color: rgba(228, 158, 172, 0.9);
+  color: #ffffff;
+
+  /* Vnější záře (Glow), která není agresivní, ale je vidět */
+  box-shadow: 0 0 20px rgba(149, 77, 95, 0.3),
+    inset 0 0 15px rgba(228, 158, 172, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn1:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+@keyframes bounce {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-10px);
+  }
+
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+
+  100% {
+    transform: scale(1.2);
+    opacity: 0.6;
+  }
+}

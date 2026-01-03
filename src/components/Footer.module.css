@@ -1,0 +1,271 @@
+/* Mobile-First Footer Styles */
+.footer {
+    background: linear-gradient(180deg, var(--night-bordeaux) 0%, var(--rich-mahogany) 100%);
+    border-top: 1px solid rgba(228, 158, 172, 0.2);
+    padding: 3rem 1.5rem 2rem;
+    position: relative;
+    width: 100%;
+}
+
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent 0%,
+            var(--pink-mist) 50%,
+            transparent 100%);
+    opacity: 0.5;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+/* Brand Section */
+.brandSection {
+    text-align: center;
+}
+
+.brandName {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--pink-mist);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
+}
+
+.brandTagline {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 300;
+}
+
+/* Navigation Section */
+.navigation {
+    text-align: center;
+}
+
+.sectionTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pink-mist);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.linkList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.navLink {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    display: inline-block;
+    position: relative;
+}
+
+.navLink::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 0;
+    height: 1px;
+    background: var(--pink-mist);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.navLink:hover {
+    color: var(--pink-mist);
+}
+
+.navLink:hover::after {
+    width: 100%;
+}
+
+/* Social Media Section */
+.socialSection {
+    text-align: center;
+}
+
+.socialLinks {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.socialLink {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(228, 158, 172, 0.1);
+    border: 1px solid rgba(228, 158, 172, 0.3);
+    border-radius: 50%;
+    color: var(--pink-mist);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(5px);
+}
+
+.socialLink:hover {
+    background: rgba(149, 77, 95, 0.3);
+    border-color: var(--pink-mist);
+    color: #ffffff;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(149, 77, 95, 0.4);
+}
+
+.socialLink:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+.socialLink svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Copyright Section */
+.copyright {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(228, 158, 172, 0.15);
+}
+
+.copyright p {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+}
+
+/* Tablet Breakpoint (min-width: 640px) */
+@media (min-width: 640px) {
+    .footer {
+        padding: 4rem 2rem 2.5rem;
+    }
+
+    .linkList {
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1.5rem 2rem;
+    }
+
+    .socialLinks {
+        gap: 2rem;
+    }
+}
+
+/* Desktop Breakpoint (min-width: 768px) */
+@media (min-width: 768px) {
+    .footer {
+        padding: 5rem 3rem 3rem;
+    }
+
+    .container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 3rem 4rem;
+        text-align: left;
+    }
+
+    .brandSection {
+        text-align: left;
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+    }
+
+    .brandName {
+        font-size: 1.75rem;
+    }
+
+    .brandTagline {
+        font-size: 1rem;
+    }
+
+    .navigation {
+        text-align: left;
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+    }
+
+    .linkList {
+        justify-content: flex-start;
+        flex-direction: column;
+        gap: 0.875rem;
+    }
+
+    .socialSection {
+        text-align: left;
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+    }
+
+    .socialLinks {
+        justify-content: flex-start;
+        gap: 1.25rem;
+    }
+
+    .copyright {
+        grid-column: 1 / -1;
+        grid-row: 3 / 4;
+        text-align: center;
+        margin-top: 1rem;
+    }
+}
+
+/* Large Desktop Breakpoint (min-width: 1024px) */
+@media (min-width: 1024px) {
+    .container {
+        grid-template-columns: 2fr 1.5fr 1.5fr;
+        grid-template-rows: auto auto;
+        gap: 3rem;
+    }
+
+    .brandSection {
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+    }
+
+    .navigation {
+        grid-column: 2 / 3;
+        grid-row: 1 / 2;
+    }
+
+    .socialSection {
+        grid-column: 3 / 4;
+        grid-row: 1 / 2;
+    }
+
+    .copyright {
+        grid-column: 1 / -1;
+        grid-row: 2 / 3;
+        padding-top: 2.5rem;
+    }
+
+    .linkList {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.875rem 2rem;
+    }
+}
