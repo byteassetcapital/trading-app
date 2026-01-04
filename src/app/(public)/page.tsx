@@ -139,7 +139,10 @@ export default function Home() {
             width: '50%',
             height: '350px',
             overflow: 'hidden',
-            borderRadius: '20px', // Zde nastavíte požadované zaoblení
+            borderRadius: '20px',
+            // Tady se děje to kouzlo:
+            WebkitMaskImage: 'radial-gradient(circle, black 60%, rgba(0,0,0,0) 100%)',
+            maskImage: 'radial-gradient(circle, black 60%, rgba(0,0,0,0) 100%)',
             marginTop: '20px',
           }}>
             <video
@@ -151,7 +154,7 @@ export default function Home() {
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover' // Důležité: video vyplní celý zaoblený kontejner
+                objectFit: 'cover'
               }}
             />
           </div>
