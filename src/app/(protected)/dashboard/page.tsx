@@ -93,7 +93,7 @@ export default function Dashboard() {
 
 
         {/* Active Bots */}
-        <div className="grid-item bots-area">
+        <div className="grid-item bots-area" style={{ display: 'none' }}>
           <ActiveBots onLoaded={() => handleLoaded('activeBots')} />
         </div>
 

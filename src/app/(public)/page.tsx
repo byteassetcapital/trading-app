@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import PricingSection from '@/components/PricingSection';
+import TestimonialsSection from '@/components/TestimonialsSection';
 import styles from './page.module.css';
 
 
@@ -337,6 +338,10 @@ export default function Home() {
       {/* PRICING SECTION */}
 
 
+      {/* TESTIMONIALS SECTION */}
+      <TestimonialsSection />
+
+      {/* PRICING SECTION */}
       <PricingSection />
       <div className="important-info">
         <p>Všechny strategie jsou backtestovány na historických datech od 2015, live track record od 2023. Kapitál klienta je vždy segregován. Žádné skryté poplatky.</p>
