@@ -134,6 +134,28 @@ export default function Home() {
             <p>Žádné ruční obchodování. Žádné impulzivní chyby. Jen systematická exekuce.</p>
           </div>
 
+          <div style={{
+            position: 'relative',
+            width: '50%',
+            height: '350px',
+            overflow: 'hidden',
+            borderRadius: '20px', // Zde nastavíte požadované zaoblení
+            marginTop: '20px',
+          }}>
+            <video
+              src="/vid.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover' // Důležité: video vyplní celý zaoblený kontejner
+              }}
+            />
+          </div>
+
           <div onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
             style={{
               position: 'absolute',
