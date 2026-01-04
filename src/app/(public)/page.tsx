@@ -424,6 +424,7 @@ export default function Home() {
   min-height: 100vh;
   position: relative;
   z-index: 2;
+  padding-top: 140px;
 }
 
       .important-info  { 
