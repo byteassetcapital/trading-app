@@ -19,6 +19,29 @@ export type QuickStatsData = {
     bestTrade: string;
 };
 
+// --- DATABASE TYPES ---
+// Based on user provided schema
+export type DbTrade = {
+    id: string;
+    user_id: string;
+    trading_account_id: string;
+    exchange_platform: 'binance' | 'bybit'; // extended as needed
+    exchange_order_id: string;
+    symbol: string;
+    side: 'buy' | 'sell';
+    quantity: number;
+    price: number;
+    executed_quantity: number;
+    executed_price: number;
+    fee: number;
+    fee_currency: string;
+    profit_loss: number;
+    opened_at: string;
+    closed_at: string;
+    metadata: any;
+    created_at: string;
+};
+
 export type TradeItem = {
     id: string;
     type: 'buy' | 'sell';
@@ -67,17 +90,7 @@ export type RealizedPnLData = {
     breakdown: { label: string; value: number }[];
 };
 
-export type PortfolioHistoryPoint = {
-    timestamp: number;
-    value: number;
-};
 
-export type PortfolioHistoryData = {
-    currentValue: number;
-    changePercent: number;
-    changeAmount: number;
-    history: PortfolioHistoryPoint[];
-};
 
 // --- HELPER: Get Connections ---
 async function getUserConnections(accessToken: string) {
@@ -97,7 +110,39 @@ async function getUserConnections(accessToken: string) {
     return data || [];
 }
 
-// --- ACTIONS ---
+const mapBinanceTradeToDb = (connId: string, userId: string, trade: any): Partial<DbTrade> => {
+    // Map CCXT trade to DB schema
+    // info.realizedPnl is string in Binance Futures
+    const pnl = trade.info && trade.info.realizedPnl ? parseFloat(trade.info.realizedPnl) : 0;
+
+    // We use trade.id as exchange_order_id to satisfy unique constraint on (trading_account_id, exchange_order_id)
+    // and distinct individual executions.
+    // metadata will store the actual Order ID.
+
+    return {
+        user_id: userId,
+        trading_account_id: connId,
+        exchange_platform: 'binance',
+        exchange_order_id: trade.id, // Using Trade ID for uniqueness per execution
+        symbol: trade.symbol,
+        side: trade.side,
+        quantity: trade.amount, // For an execution, quantity = executed
+        price: trade.price,
+        executed_quantity: trade.amount,
+        executed_price: trade.price,
+        fee: trade.fee ? parseFloat(trade.fee.cost) : 0,
+        fee_currency: trade.fee ? trade.fee.currency : 'USDT',
+        profit_loss: pnl,
+        opened_at: new Date(trade.timestamp).toISOString(),
+        closed_at: new Date(trade.timestamp).toISOString(), // Executions are instant
+        metadata: {
+            original_order_id: trade.order,
+            raw: trade.info,
+            commission_asset: trade.info?.commissionAsset
+        }
+    };
+};
+
 
 export async function getQuickStats(accessToken: string, filterAsset?: string): Promise<QuickStatsData | null> {
     if (!accessToken) return null;
@@ -130,10 +175,16 @@ export async function getQuickStats(accessToken: string, filterAsset?: string): 
                     enableRateLimit: true,
                     options: {
                         defaultType: 'future',
-                        recvWindow: 10000
+                        recvWindow: 60000,
+                        adjustForTimeDifference: true
                     }
                 });
+                // Explicitly set options to ensure they are respected
+                exchange.options['adjustForTimeDifference'] = true;
+                exchange.options['recvWindow'] = 60000;
+
                 if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
 
                 try { await exchange.loadMarkets(); } catch { }
 
@@ -197,10 +248,16 @@ export async function getRecentTrades(accessToken: string): Promise<TradeItem[]>
                     enableRateLimit: true,
                     options: {
                         defaultType: 'future',
-                        recvWindow: 10000
+                        recvWindow: 60000,
+                        adjustForTimeDifference: true
                     }
                 });
+                // Explicitly set options to ensure they are respected
+                exchange.options['adjustForTimeDifference'] = true;
+                exchange.options['recvWindow'] = 60000;
+
                 if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
                 try { await exchange.loadMarkets(); } catch { }
 
                 // Fetch trades for major pairs
@@ -268,10 +325,16 @@ export async function getAccountData(accessToken: string): Promise<AccountData |
                     enableRateLimit: true,
                     options: {
                         defaultType: 'future',
-                        recvWindow: 10000
+                        recvWindow: 60000,
+                        adjustForTimeDifference: true
                     }
                 });
+                // Explicitly set options to ensure they are respected
+                exchange.options['adjustForTimeDifference'] = true;
+                exchange.options['recvWindow'] = 60000;
+
                 if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
 
                 // Balance
                 const balance = await exchange.fetchBalance();
@@ -332,6 +395,13 @@ export async function getAccountData(accessToken: string): Promise<AccountData |
     };
 }
 
+const TRADING_PAIRS = [
+    'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'XRP/USDT',
+    'DOGE/USDT', 'ADA/USDT', 'AVAX/USDT', 'LINK/USDT', 'MATIC/USDT',
+    'DOT/USDT', 'LTC/USDT', 'SHIB/USDT', 'TRX/USDT',
+    'BTC/USDC', 'ETH/USDC', 'SOL/USDC', 'BNB/USDC'
+];
+
 export async function getOpenOrders(accessToken: string): Promise<OrderItem[]> {
     if (!accessToken) return [];
     const connections = await getUserConnections(accessToken);
@@ -352,48 +422,40 @@ export async function getOpenOrders(accessToken: string): Promise<OrderItem[]> {
                     enableRateLimit: true,
                     options: {
                         defaultType: 'future',
-                        recvWindow: 10000
+                        recvWindow: 60000,
+                        adjustForTimeDifference: true,
+                        warnOnFetchOpenOrdersWithoutSymbol: false
                     }
                 });
+                // Explicitly set options to ensure they are respected
+                exchange.options['adjustForTimeDifference'] = true;
+                exchange.options['recvWindow'] = 60000;
+                exchange.options['warnOnFetchOpenOrdersWithoutSymbol'] = false;
+
                 if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
 
                 // Load markets is crucial for symbol mapping
                 try { await exchange.loadMarkets(); } catch (e) { console.error("Load markets failed", e); }
 
                 let orders: any[] = [];
-                let bulkSuccess = false;
 
-                // 1. Try fetching ALL open orders
-                try {
-                    orders = await exchange.fetchOpenOrders();
-                    bulkSuccess = true;
-                } catch (e) {
-                    console.error('Bulk fetchOpenOrders failed, attempting fallback', e);
-                }
+                // We skip the bulk fetchOpenOrders() as it often fails with "ExchangeError" or strict rate limits.
+                // Instead, we iterate over known major pairs which is more reliable.
 
-                // 2. Fallback: If bulk failed or returned 0, try specific major symbols.
-                // Sometimes USDC pairs or specific new pairs aren't returned in the bulk call on some account types or API versions.
-                if (!bulkSuccess || orders.length === 0) {
-                    const fallbackSymbols = [
-                        'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'XRP/USDT', 'DOGE/USDT',
-                        'BTC/USDC', 'ETH/USDC', 'SOL/USDC', 'BNB/USDC', // USDC Pairs (BTCUSDCPERP maps to BTC/USDC)
-                        'BTC/USDC:USDC', 'ETH/USDC:USDC' // Explicit precision variants just in case
-                    ];
+                // Filter for symbols that actually exist in the loaded markets
+                const activeSymbols = TRADING_PAIRS.filter(s => exchange.markets && exchange.markets[s]);
 
-                    // Filter for symbols that actually exist in the loaded markets
-                    const activeSymbols = fallbackSymbols.filter(s => exchange.markets[s]);
+                await Promise.all(activeSymbols.map(async (sym) => {
+                    try {
+                        const pairOrders = await exchange.fetchOpenOrders(sym);
+                        if (pairOrders && pairOrders.length > 0) {
+                            orders.push(...pairOrders);
+                        }
+                    } catch { /* Ignore individual symbol errors */ }
+                }));
 
-                    await Promise.all(activeSymbols.map(async (sym) => {
-                        try {
-                            const pairOrders = await exchange.fetchOpenOrders(sym);
-                            if (pairOrders && pairOrders.length > 0) {
-                                orders.push(...pairOrders);
-                            }
-                        } catch { /* Ignore individual symbol errors */ }
-                    }));
-                }
-
-                // Deduplicate orders by ID (in case fallback overlapped or multiple calls found same order)
+                // Deduplicate orders by ID
                 const uniqueIds = new Set();
 
                 orders.forEach((o: any) => {
@@ -453,16 +515,21 @@ export async function getRealizedPnLStats(accessToken: string): Promise<Realized
                     enableRateLimit: true,
                     options: {
                         defaultType: 'future',
-                        recvWindow: 10000
+                        recvWindow: 60000,
+                        adjustForTimeDifference: true
                     }
                 });
+                exchange.options['adjustForTimeDifference'] = true;
+                exchange.options['recvWindow'] = 60000;
+
                 if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
                 try { await exchange.loadMarkets(); } catch { }
 
-                const symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BTC/USDC', 'ETH/USDC'];
+                const symbols = TRADING_PAIRS;
                 await Promise.all(symbols.map(async (symbol) => {
                     try {
-                        // fetch 500 trades to get a decent history for "Total PnL"
+                        // fetch 50 trades to get a decent history for "Total PnL"
                         const trades = await exchange.fetchMyTrades(symbol, undefined, undefined, { limit: 50 });
                         trades.forEach((t: any) => {
                             if (t.info?.realizedPnl) futuresPnL += parseFloat(t.info.realizedPnl);
@@ -485,24 +552,19 @@ export async function getRealizedPnLStats(accessToken: string): Promise<Realized
     };
 }
 
-export async function getPortfolioHistory(accessToken: string, timeframe: string = '1M'): Promise<PortfolioHistoryData | null> {
-    if (!accessToken) return null;
+// NEW: Sync Action
+export async function syncBinanceTrades(accessToken: string) {
+    if (!accessToken) return { success: false, error: 'No token' };
+
     const connections = await getUserConnections(accessToken);
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    });
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: 'No user' };
 
-    let currentBalance = 0;
-    const allTrades: any[] = [];
+    let totalSynced = 0;
 
-    const timeframeMap: Record<string, number> = {
-        '1D': 24 * 60 * 60 * 1000,
-        '1W': 7 * 24 * 60 * 60 * 1000,
-        '1M': 30 * 24 * 60 * 60 * 1000,
-        '3M': 90 * 24 * 60 * 60 * 1000,
-        '1Y': 365 * 24 * 60 * 60 * 1000,
-    };
-    const lookback = timeframeMap[timeframe] || timeframeMap['1M'];
-    const since = Date.now() - lookback;
-
-    // 1. Get Current Balance & Income History
     for (const conn of connections) {
         if (conn.exchange_platform === 'binance') {
             const apiKey = decrypt(conn.api_key_encrypted);
@@ -513,124 +575,87 @@ export async function getPortfolioHistory(accessToken: string, timeframe: string
 
             try {
                 const exchange = new ccxt.binance({
-                    apiKey,
-                    secret,
-                    enableRateLimit: true,
+                    apiKey, secret, enableRateLimit: true,
                     options: {
                         defaultType: 'future',
-                        recvWindow: 10000
+                        adjustForTimeDifference: true,
+                        recvWindow: 60000,
+                        warnOnFetchOpenOrdersWithoutSymbol: false
                     }
                 });
+                exchange.options['recvWindow'] = 60000;
+                exchange.options['warnOnFetchOpenOrdersWithoutSymbol'] = false;
+
                 if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
 
-                // A. Fetch Current Balance
-                const balance = await exchange.fetchBalance();
-                ['USDT', 'USDC'].forEach(asset => {
-                    if (balance[asset]) currentBalance += balance[asset].total || 0;
-                });
+                // 1. Get last synced trade timestamp for this connection
+                const { data: lastTrade } = await supabase
+                    .from('trades')
+                    .select('opened_at')
+                    .eq('trading_account_id', conn.id)
+                    .order('opened_at', { ascending: false })
+                    .limit(1)
+                    .single();
 
-                // B. Fetch Income History (Realized PnL, Commission, Funding, Transfers)
-                // fetchIncome is supported by CCXT for Binance Futures (fapi/v1/income)
-                // usage: fetchIncome (symbol = undefined, since = undefined, limit = 1000, params = {})
-                let incomeFetched = false;
-                // Try to fetch income. If it fails (permissions/API), fallback to trades logic?
-                // Note: 'limit' max is usually 1000. For longer timeframes we might miss data if >1000 events.
-                if (typeof (exchange as any).fetchIncome === 'function') {
+                // Start from 1 year ago or last trade time + 1ms
+                let since = lastTrade ? new Date(lastTrade.opened_at).getTime() + 1 : Date.now() - (365 * 24 * 60 * 60 * 1000);
+
+                await exchange.loadMarkets();
+
+                // Use the expanded TRADING_PAIRS list
+                const symbols = TRADING_PAIRS;
+
+                for (const symbol of symbols) {
                     try {
-                        const income = await (exchange as any).fetchIncome(undefined, since, 1000);
-                        allTrades.push(...income);
-                        incomeFetched = true;
+                        let fetchMore = true;
+                        let batchSince = since;
+
+                        while (fetchMore) {
+                            const trades = await exchange.fetchMyTrades(symbol, batchSince, undefined, { limit: 50 });
+                            if (trades.length === 0) {
+                                fetchMore = false;
+                                break;
+                            }
+
+                            // Prepare upsert payload
+                            const rows = trades.map(t => mapBinanceTradeToDb(conn.id, user.id, t));
+
+                            // Upsert
+                            const { error: upsertError } = await supabase
+                                .from('trades')
+                                .upsert(rows, { onConflict: 'trading_account_id, exchange_order_id', ignoreDuplicates: true });
+
+                            if (upsertError) {
+                                console.error('Upsert failed', upsertError);
+                            } else {
+                                totalSynced += trades.length;
+                            }
+
+                            const lastTimestamp = trades[trades.length - 1]?.timestamp || 0;
+                            if (lastTimestamp > batchSince) {
+                                batchSince = lastTimestamp + 1;
+                            } else {
+                                fetchMore = false;
+                            }
+
+                            // Safety break
+                            if (trades.length < 50) fetchMore = false;
+                        }
                     } catch (err) {
-                        console.log('Fetch Income failed, will use fallback', err);
+                        console.error(`Sync error for ${symbol}`, err);
                     }
                 }
 
-                if (!incomeFetched) {
-                    // Fallback to trades if income fails, but income is preferred for PnL
-                    await exchange.loadMarkets();
-                    const symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BTC/USDC', 'ETH/USDC'];
-                    await Promise.all(symbols.map(async (symbol) => {
-                        try {
-                            const trades = await (exchange as any).fetchMyTrades(symbol, since, undefined, { limit: 100 });
-                            // Map trade to similar structure as income for processing
-                            trades.forEach((t: any) => {
-                                const pnl = t.info && t.info.realizedPnl ? parseFloat(t.info.realizedPnl) : 0;
-                                const fee = t.fee ? parseFloat(t.fee.cost || 0) : 0; // Fee is negative effect
-                                // Create a synthetic "income" item
-                                allTrades.push({
-                                    timestamp: t.timestamp,
-                                    income: pnl - fee, // simplified net effect
-                                    asset: 'USDT' // assume
-                                });
-                            });
-                        } catch { }
-                    }));
-                }
-
-            } catch (e) { console.error('Portfolio History Error:', e); }
+            } catch (e) { console.error('Sync Connect Error', e); }
         }
     }
 
-    if (currentBalance === 0 && allTrades.length === 0) return null;
-
-    // 2. Sort DESC (newest first)
-    allTrades.sort((a, b) => b.timestamp - a.timestamp);
-
-    // 3. Reconstruct history backwards
-    const history: PortfolioHistoryPoint[] = [];
-
-    // Add "Now" point
-    let runningBalance = currentBalance;
-    history.push({ timestamp: Date.now(), value: runningBalance });
-
-    for (const item of allTrades) {
-        // Income item structure: { income: number (string), asset: string, ... }
-        // We need to parse 'income' value.
-        let change = 0;
-
-        // CCXT fetchIncome returns 'amount' in 'income' sometimes or 'amount' field? 
-        // CCXT: .amount is the value.
-        if (item.amount !== undefined) {
-            change = item.amount;
-        } else if (item.income !== undefined) {
-            // Fallback/Synthetic
-            change = typeof item.income === 'string' ? parseFloat(item.income) : item.income;
-        }
-
-        // Logic: Balance_before = Balance_after - Change
-        runningBalance = runningBalance - change;
-
-        // Only add point if it's within our window (it should be, due to 'since' filter, but double check)
-        if (item.timestamp >= since) {
-            history.push({
-                timestamp: item.timestamp,
-                value: runningBalance
-            });
-        }
-    }
-
-    // Add Start Point (at 'since')
-    // The last calculated runningBalance is roughly the balance at the start of the timeframe (or end of list).
-    // We should clamp it to 'since' time for the chart to look like it starts at the edge.
-    history.push({ timestamp: since, value: runningBalance });
-
-    // 4. Reverse to ASC
-    history.reverse();
-
-    // 5. Stats
-    const firstPoint = history[0];
-    const lastPoint = history[history.length - 1];
-
-    const changeAmount = lastPoint.value - firstPoint.value;
-    const changePercent = firstPoint.value !== 0 ? (changeAmount / firstPoint.value) * 100 : 0;
-
-    return {
-        currentValue: currentBalance,
-        changeAmount,
-        changePercent,
-        history
-    };
+    return { success: true, count: totalSynced };
 }
+
+
+
 
 // --- STREAMING ---
 
@@ -655,10 +680,16 @@ export async function getBinanceUserStreamKey(accessToken: string): Promise<{ li
                     enableRateLimit: true,
                     options: {
                         defaultType: 'future',
-                        recvWindow: 10000
+                        recvWindow: 60000,
+                        adjustForTimeDifference: true
                     }
                 });
+                // Explicitly set options to ensure they are respected
+                exchange.options['adjustForTimeDifference'] = true;
+                exchange.options['recvWindow'] = 60000;
+
                 if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
 
                 // Usually for Futures it is fapiPrivatePostListenKey
                 // Note: CCXT types might not explicitly list all implicit API methods in TS, 

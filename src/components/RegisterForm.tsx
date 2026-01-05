@@ -241,7 +241,7 @@ export default function RegisterForm() {
 
           {error && <div className="error-msg">{error}</div>}
 
-          <button type="submit" className="btn-primary full-width" disabled={loading}>
+          <button type="submit" className="btnPrimary full-width" disabled={loading}>
             {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
@@ -268,6 +268,9 @@ export default function RegisterForm() {
           margin-bottom: 0.5rem;
           text-align: center;
           font-weight: 700;
+          color: #ffffff;
+
+          
         }
 
         .subtitle {

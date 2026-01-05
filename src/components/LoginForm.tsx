@@ -36,7 +36,7 @@ export default function LoginForm() {
   return (
     <>
       <div className="glass-panel login-container">
-        <h2 className="title glow-text">Vítejte zpět</h2>
+        <h2 className="title">Vítejte zpět</h2>
         <p className="subtitle">Zadejte své údaje pro přístup do terminálu.</p>
 
         <form className="login-form" onSubmit={handleSubmit}>
@@ -88,6 +88,7 @@ export default function LoginForm() {
         .title {
           font-size: 2rem;
           margin-bottom: 0.5rem;
+          color: #ffffff;
         }
 
         .subtitle {

@@ -16,11 +16,19 @@ export default function Register() {
           min-height: 100vh;
           width: 100%;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
-          padding-top: 35px;
+          padding-top: 150px;
+          padding-bottom: 40px;
+          padding-left: 1rem;
+          padding-right: 1rem;
           position: relative;
-          overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+          .register-container {
+            padding-top: 160px;
+          }
         }
       `}</style>
     </div>

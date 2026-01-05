@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import PricingSection from '@/components/PricingSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
+import TradeCryptoSection from '@/components/TradeCryptoSection';
 import styles from './page.module.css';
 
 
@@ -196,6 +197,8 @@ export default function Home() {
 
 
 
+
+
       {/* NOVÁ SEKCE - Opravená pro loga */}
       <section className="image-section">
         <div className="image-container">
@@ -247,6 +250,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+
+
 
       {/* CONSISTENCY SECTION */}
       <section className="consistency-section">
@@ -360,6 +366,8 @@ export default function Home() {
         </div>
       </section>
 
+
+      <TradeCryptoSection />
       {/* PRICING SECTION */}
 
 

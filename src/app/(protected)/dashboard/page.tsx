@@ -10,7 +10,7 @@ import {
   RealizedPnL,
   UnrealizedPnL,
   ActiveBots,
-  PortfolioChart,
+  Watchlist,
   AccountBalance,
   QuickStats,
 } from "@/components/dashboard";
@@ -23,7 +23,7 @@ export default function Dashboard() {
     quickStats: true,
     liveTrades: true,
     waitingTrades: true,
-    portfolioChart: true,
+    watchlist: true,
     unrealizedPnL: true,
     realizedPnL: true,
     accountBalance: true,
@@ -76,9 +76,9 @@ export default function Dashboard() {
       <div className="dash-grid">
 
 
-        {/* Portfolio Chart */}
+        {/* Watchlist / Mini Charts */}
         <div className="grid-item chart-area">
-          <PortfolioChart onLoaded={() => handleLoaded('portfolioChart')} />
+          <Watchlist onLoaded={() => handleLoaded('watchlist')} />
         </div>
 
         {/* P&L Section - Mobile: stacked, Desktop: side by side */}
