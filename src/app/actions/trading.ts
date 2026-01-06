@@ -90,6 +90,13 @@ export type RealizedPnLData = {
     breakdown: { label: string; value: number }[];
 };
 
+export type DailyPnLData = {
+    date: string; // YYYY-MM-DD
+    pnl: number;
+    tradesCount: number;
+    dayLabel: string; // "Mon", "Tue"...
+};
+
 
 
 // --- HELPER: Get Connections ---
@@ -721,4 +728,112 @@ export async function getBinanceUserStreamKey(accessToken: string): Promise<{ li
         }
     }
     return null;
+}
+
+// --- CHARTS ---
+
+export async function getDailyPnL(accessToken: string, days: number = 14): Promise<DailyPnLData[]> {
+    if (!accessToken) return [];
+
+    // Normalize days
+    const rangeDays = days > 0 ? days : 14;
+
+    const connections = await getUserConnections(accessToken);
+    const dailyMap = new Map<string, { pnl: number, count: number }>();
+
+    // Initialize map with empty days to ensure continuous chart
+    for (let i = rangeDays - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        dailyMap.set(dateStr, { pnl: 0, count: 0 });
+    }
+
+    // Calculate "since" timestamp (start of the first day in range)
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - rangeDays);
+    startDate.setHours(0, 0, 0, 0);
+    const since = startDate.getTime();
+
+    for (const conn of connections) {
+        if (conn.exchange_platform === 'binance') {
+            const apiKey = decrypt(conn.api_key_encrypted);
+            const secret = decrypt(conn.api_secret_encrypted);
+            if (!apiKey || !secret) continue;
+
+            const isTestnet = String(conn.is_testnet) === 'true' || conn.is_testnet === true;
+
+            try {
+                const exchange = new ccxt.binance({
+                    apiKey, secret, enableRateLimit: true,
+                    options: { defaultType: 'future', adjustForTimeDifference: true, recvWindow: 60000 }
+                });
+                exchange.options['recvWindow'] = 60000;
+                exchange.options['warnOnFetchOpenOrdersWithoutSymbol'] = false; // Silence warning
+
+                if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
+
+                const symbols = TRADING_PAIRS; // Use the minor subset for speed, or fetch all if needed
+
+                await Promise.all(symbols.map(async (symbol) => {
+                    try {
+                        let fetchMore = true;
+                        let batchSince = since;
+
+                        while (fetchMore) {
+                            const trades = await exchange.fetchMyTrades(symbol, batchSince, undefined, { limit: 50 });
+                            if (!trades || trades.length === 0) {
+                                fetchMore = false;
+                                break;
+                            }
+
+                            trades.forEach(t => {
+                                const pnl = t.info && t.info.realizedPnl ? parseFloat(t.info.realizedPnl) : 0;
+                                const feeCost = (t.fee && t.fee.cost) ? t.fee.cost : 0;
+
+                                // Only count trades that have PnL or are significant
+                                if (pnl !== 0 || feeCost > 0) {
+                                    // Use execution time
+                                    const ts = t.timestamp || Date.now();
+                                    const dateStr = new Date(ts).toISOString().split('T')[0];
+
+                                    if (dailyMap.has(dateStr)) {
+                                        const current = dailyMap.get(dateStr)!;
+                                        current.pnl += pnl;
+                                        if (pnl !== 0) current.count += 1;
+                                        dailyMap.set(dateStr, current);
+                                    }
+                                }
+                            });
+
+                            const lastTs = trades[trades.length - 1]?.timestamp;
+                            if (lastTs && lastTs > batchSince) {
+                                batchSince = lastTs + 1;
+                            } else {
+                                fetchMore = false;
+                            }
+
+                            if (trades.length < 50) fetchMore = false;
+                        }
+                    } catch { }
+                }));
+
+            } catch (e) { console.error('Daily PnL Error', e); }
+        }
+    }
+
+    // Convert map to array
+    const result: DailyPnLData[] = Array.from(dailyMap.entries()).map(([date, data]) => {
+        const d = new Date(date);
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' }); // Mon, Tue
+        return {
+            date, // 2024-01-01
+            pnl: data.pnl,
+            tradesCount: data.count,
+            dayLabel
+        };
+    }).sort((a, b) => a.date.localeCompare(b.date));
+
+    return result;
 }

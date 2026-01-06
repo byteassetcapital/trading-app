@@ -13,6 +13,8 @@ import {
   Watchlist,
   AccountBalance,
   QuickStats,
+  PnLAnalysis,
+  MainChart,
 } from "@/components/dashboard";
 
 
@@ -78,7 +80,10 @@ export default function Dashboard() {
 
         {/* Watchlist / Mini Charts */}
         <div className="grid-item chart-area">
-          <Watchlist onLoaded={() => handleLoaded('watchlist')} />
+          <div className="charts-stack">
+            <MainChart />
+            <Watchlist onLoaded={() => handleLoaded('watchlist')} />
+          </div>
         </div>
 
         {/* P&L Section - Mobile: stacked, Desktop: side by side */}
@@ -86,6 +91,7 @@ export default function Dashboard() {
           <div className="pnl-grid">
             <UnrealizedPnL onLoaded={() => handleLoaded('unrealizedPnL')} />
             <RealizedPnL onLoaded={() => handleLoaded('realizedPnL')} />
+            <PnLAnalysis />
             <AccountBalance onLoaded={() => handleLoaded('accountBalance')} />
           </div>
         </div>
@@ -310,6 +316,12 @@ export default function Dashboard() {
           .header-left h1 {
             font-size: 2rem;
           }
+        }
+
+        .charts-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
         }
       `}</style>
     </div >

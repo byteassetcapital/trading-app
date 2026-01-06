@@ -8,3 +8,5 @@ export { default as AccountBalance } from './AccountBalance';
 export { default as QuickStats } from './QuickStats';
 export { default as LiveTrades } from './LiveTrades';
 export { default as WaitingTrades } from './WaitingTrades';
+export { default as PnLAnalysis } from './PnLAnalysis';
+export { default as MainChart } from './MainChart';
