@@ -1,48 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import React from 'react';
+
 import PricingSection from '@/components/PricingSection';
 import TestimonialsSection from '@/components/TestimonialsSection';
 import TradeCryptoSection from '@/components/TradeCryptoSection';
+import FreeTrialBenefits from '@/components/FreeTrialBenefits';
+import EarlyAccessForm from '@/components/EarlyAccessForm';
 import styles from './page.module.css';
 
 
 export default function Home() {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-  const [phone, setPhone] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      const { error } = await supabase
-        .from('early_access')
-        .insert([
-          { email: email, phone: phone, source: 'home' }
-        ]);
-
-      if (error) {
-        throw error;
-      }
-
-      setMessage({ text: 'Reigstrace úspěšná! Děkujeme.', type: 'success' });
-      setEmail('');
-      setPhone('');
-    } catch (error) {
-      console.error('Error inserting email:', error);
-      setMessage({ text: 'Něco se pokazilo. Zkuste to prosím znovu.', type: 'error' });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
 
@@ -73,8 +43,8 @@ export default function Home() {
 
           <div style={{
             position: 'relative',
-            width: '50%',
-            height: '350px',
+            width: '95%',
+            height: '100%',
             overflow: 'hidden',
             borderRadius: '20px',
             borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -96,59 +66,7 @@ export default function Home() {
           </div>
 
 
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            fontFamily: 'sans-serif',
-            paddingTop: '20px',
-            paddingBottom: '20px'
-          }}>
-            {/* Glass Container */}
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0)', // Průhledné bílé pozadí
-              backdropFilter: 'blur(12px)',               // Rozmazání pozadí (glass efekt)
-              WebkitBackdropFilter: 'blur(12px)',         // Podpora pro Safari
-              border: '0px solid rgba(255, 255, 255, 0.1)', // Jemný okraj
-              borderRadius: '24px',
-              padding: '50px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-            }}>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                {[
-                  "7 dní paper trading s virtuálními $1,000",
-                  "Žádná platební karta",
-                  "Žádný risk vlastních peněz",
-                  "Vidíš systém v akci",
-                  "Žádné ruční obchodování."
-                ].map((text, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    {/* Ikona */}
-                    <div style={{
-                      flex: 'none',
-                      width: '28px',
-                      height: '28px',
-                      backgroundColor: 'rgba(34, 197, 94, 0.2)',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      border: '1px solid rgba(34, 197, 94, 0.3)'
-                    }}>
-                      <span style={{ color: '#4ade80', fontSize: '14px', fontWeight: 'bold' }}>✓</span>
-                    </div>
-
-                    {/* Text */}
-                    <span style={{ color: '#f8fafc', fontSize: '17px', fontWeight: '500', letterSpacing: '0.3px' }}>
-                      {text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          </div>
 
 
 
@@ -178,58 +96,26 @@ export default function Home() {
         </div>
       </section >
 
+      {/* FREE TRIAL BENEFITS SECTION */}
+      <FreeTrialBenefits />
+
 
       <div className="hero-content">
         <h1 className="glow-text title">Trade Without Emotion.
           <br /><span className="gradient-text">Win With Intelligence.</span></h1>
         <p className="subtitle">Nový Přístup k Automatizovanému Tradingu</p>
 
-        <div className="cta-group">
+        <div style={{
+          display: 'none',
+          justifyContent: 'center',
+          gap: '1rem',
+          marginTop: '2rem'
+        }} className="cta-group">
           <Link href="/register" className="btnPrimary">Start Trading Now</Link>
           <Link href="/login" className="btnSecondary">Client Login</Link>
         </div>
 
-        <form className="notifyForm" onSubmit={handleSubmit}>
-          {message && (
-            <div style={{ color: message.type === 'success' ? '#4caf50' : '#f44336', marginBottom: '1rem', textAlign: 'center' }}>
-              {message.text}
-            </div>
-          )}
-          <div className="inputRow">
-            <input
-              type="email"
-              placeholder="Váš email"
-              className="emailInput"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-              required
-            />
 
-
-          </div>
-
-          <div className="checkboxContainer">
-            <input
-              type="checkbox"
-              id="info-check"
-              className="customCheckbox"
-              required
-            />
-            <label htmlFor="info-check" className="label">
-              Souhlas s GDPR a podmínkami
-            </label>
-          </div>
-
-          <button
-            type="submit"
-            className="btn1"
-            disabled={loading}
-          >
-            {loading ? 'Odesílám...' : 'Chci 1 000$ Early Access'}
-          </button>
-
-        </form>
 
       </div>
 
@@ -408,19 +294,25 @@ export default function Home() {
 
 
       <TradeCryptoSection />
-      {/* PRICING SECTION */}
+
 
 
       {/* TESTIMONIALS SECTION */}
       <TestimonialsSection />
-
-      {/* PRICING SECTION */}
-      <PricingSection />
-      <div className="important-info">
-        <p>Všechny strategie jsou backtestovány na historických datech od 2015, live track record od 2023. Kapitál klienta je vždy segregován. Žádné skryté poplatky.</p>
+      <div style={{ display: 'none' }}>
+        {/* PRICING SECTION */}
+        <PricingSection />
+        <div className="important-info">
+          <p>Všechny strategie jsou backtestovány na historických datech od 2015, live track record od 2023. Kapitál klienta je vždy segregován. Žádné skryté poplatky.</p>
+        </div>
       </div>
+      <div style={{ display: 'none', justifyContent: 'center', alignItems: 'center', textAlign: 'center', maxHeight: '30vh', minHeight: '50vh', flexDirection: 'column' }} >
+
+        <h1> Zaregistrujte se k předběžnému přístupu a my Vás upozorníme!</h1>
 
 
+        <EarlyAccessForm />
+      </div>
 
       <style jsx>{`
 
@@ -917,65 +809,7 @@ export default function Home() {
         }
         
 
-        /* FORM STYLES */
-        .notifyForm {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 1.5rem;
-          margin: 3rem auto;
-          width: 100%;
-          max-width: 600px;
-          padding: 0 1.5rem;
-        }
 
-        .inputRow {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          width: 100%;
-        }
-
-        @media (min-width: 768px) {
-          .inputRow {
-            flex-direction: row;
-          }
-        }
-
-        .emailInput {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          padding: 1rem;
-          border-radius: 12px;
-          color: white;
-          width: 100%;
-          outline: none;
-          font-size: 1rem;
-          transition: all 0.3s;
-        }
-        .emailInput:focus {
-          border-color: #E49EAC;
-          background: rgba(255, 255, 255, 0.1);
-        }
-
-        .checkboxContainer {
-          display: flex;
-          align-items: center;
-          gap: 0.8rem;
-          color: #888;
-          font-size: 0.9rem;
-          width: 100%;
-          justify-content: center;
-        }
-        
-        .customCheckbox {
-          accent-color: #E49EAC;
-          width: 18px;
-          height: 18px;
-          cursor: pointer;
-        }
-
-        .label { cursor: pointer; }
 
 
         /* TEXT UTILS - KEEPING EXISTING */
