@@ -45,7 +45,7 @@ a:hover {
 /* Utilities */
 
 .h1 {
-  font-size: 30px;
+  font-size: clamp(3rem, 40vw, 1.5rem);
   font-weight: 900;
 }
 

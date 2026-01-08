@@ -63,77 +63,13 @@ export default function Home() {
             padding: '0 20px',
             rowGap: '0.7rem',
           }}>
-            <h1 className="h1">AI trading, který obchoduje za tebe. 24/7. Bez emocí.</h1>
+            <h1 className="h1">Autonomní AI Trading</h1>
             <p className="subtitle2">
-              Spravujeme kryptokapitál pomocí autonomního AI systému, který je backtestovaný od roku 2015 a cílený na dlouhodobě stabilní výnos.
+              Nový projekt s ambicí změnit způsob, jakým lidé investují do kryptoměn. Vyzkoušej zdarma na virtuálních penězích.
             </p>
           </div>
 
-          <form className="notifyForm" onSubmit={handleSubmit}>
-            {message && (
-              <div style={{ color: message.type === 'success' ? '#4caf50' : '#f44336', marginBottom: '1rem', textAlign: 'center' }}>
-                {message.text}
-              </div>
-            )}
-            <div className="inputRow">
-              <input
-                type="email"
-                placeholder="Váš email"
-                className="emailInput"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                required
-              />
 
-              <input
-                type="tel"
-                placeholder="Váš telefon"
-                className="emailInput"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                disabled={loading}
-              />
-            </div>
-
-            <div className="checkboxContainer">
-              <input
-                type="checkbox"
-                id="info-check"
-                className="customCheckbox"
-                required
-              />
-              <label htmlFor="info-check" className="label">
-                Souhlas s GDPR a podmínkami
-              </label>
-            </div>
-
-            <button
-              type="submit"
-              className="btn1"
-              disabled={loading}
-            >
-              {loading ? 'Odesílám...' : 'Chci 1 000$ Early Access'}
-            </button>
-
-          </form>
-
-
-          <div style={{
-            display: 'flex',          // Aktivuje flexbox
-            flexDirection: 'column',   // Srovná prvky (h1 a p) pod sebe
-            alignItems: 'center',      // Vycentruje prvky horizontálně
-            justifyContent: 'center',  // Vycentruje prvky vertikálně (pokud má div výšku)
-            textAlign: 'center',       // Zajistí, že se vycentruje i samotný text uvnitř řádků
-            maxWidth: '800px',         // Pro čtení textu je lepší menší šířka než 1200px
-            margin: '0 auto',          // Vycentruje samotný kontejner na stránce
-            padding: '10px 20px',
-            rowGap: '0.7rem',
-            textTransform: 'uppercase',
-            fontWeight: "bold"
-          }}>
-            <p>Žádné ruční obchodování. Žádné impulzivní chyby. Jen systematická exekuce.</p>
-          </div>
 
           <div style={{
             position: 'relative',
@@ -141,9 +77,8 @@ export default function Home() {
             height: '350px',
             overflow: 'hidden',
             borderRadius: '20px',
-            // Tady se děje to kouzlo:
-            WebkitMaskImage: 'radial-gradient(circle, black 60%, rgba(0,0,0,0) 100%)',
-            maskImage: 'radial-gradient(circle, black 60%, rgba(0,0,0,0) 100%)',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderStyle: 'solid',
             marginTop: '20px',
           }}>
             <video
@@ -159,6 +94,68 @@ export default function Home() {
               }}
             />
           </div>
+
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            fontFamily: 'sans-serif',
+            paddingTop: '20px',
+            paddingBottom: '20px'
+          }}>
+            {/* Glass Container */}
+            <div style={{
+              backgroundColor: 'rgba(255, 255, 255, 0)', // Průhledné bílé pozadí
+              backdropFilter: 'blur(12px)',               // Rozmazání pozadí (glass efekt)
+              WebkitBackdropFilter: 'blur(12px)',         // Podpora pro Safari
+              border: '0px solid rgba(255, 255, 255, 0.1)', // Jemný okraj
+              borderRadius: '24px',
+              padding: '50px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            }}>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {[
+                  "7 dní paper trading s virtuálními $1,000",
+                  "Žádná platební karta",
+                  "Žádný risk vlastních peněz",
+                  "Vidíš systém v akci",
+                  "Žádné ruční obchodování."
+                ].map((text, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    {/* Ikona */}
+                    <div style={{
+                      flex: 'none',
+                      width: '28px',
+                      height: '28px',
+                      backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid rgba(34, 197, 94, 0.3)'
+                    }}>
+                      <span style={{ color: '#4ade80', fontSize: '14px', fontWeight: 'bold' }}>✓</span>
+                    </div>
+
+                    {/* Text */}
+                    <span style={{ color: '#f8fafc', fontSize: '17px', fontWeight: '500', letterSpacing: '0.3px' }}>
+                      {text}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+            </div>
+          </div>
+
+
+
+
+
+
+
 
           <div onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
             style={{
@@ -179,18 +176,61 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
 
       <div className="hero-content">
         <h1 className="glow-text title">Trade Without Emotion.
           <br /><span className="gradient-text">Win With Intelligence.</span></h1>
-        <p className="subtitle">Institutional-grade AI trading algorithms for the modern investor.</p>
+        <p className="subtitle">Nový Přístup k Automatizovanému Tradingu</p>
 
         <div className="cta-group">
           <Link href="/register" className="btnPrimary">Start Trading Now</Link>
           <Link href="/login" className="btnSecondary">Client Login</Link>
         </div>
+
+        <form className="notifyForm" onSubmit={handleSubmit}>
+          {message && (
+            <div style={{ color: message.type === 'success' ? '#4caf50' : '#f44336', marginBottom: '1rem', textAlign: 'center' }}>
+              {message.text}
+            </div>
+          )}
+          <div className="inputRow">
+            <input
+              type="email"
+              placeholder="Váš email"
+              className="emailInput"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              required
+            />
+
+
+          </div>
+
+          <div className="checkboxContainer">
+            <input
+              type="checkbox"
+              id="info-check"
+              className="customCheckbox"
+              required
+            />
+            <label htmlFor="info-check" className="label">
+              Souhlas s GDPR a podmínkami
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            className="btn1"
+            disabled={loading}
+          >
+            {loading ? 'Odesílám...' : 'Chci 1 000$ Early Access'}
+          </button>
+
+        </form>
+
       </div>
 
 
@@ -383,6 +423,33 @@ export default function Home() {
 
 
       <style jsx>{`
+
+ 
+  .feature-list {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Mezera mezi řádky */
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: center; /* Zarovná fajfku na střed textu */
+    font-size: 16px;
+    color: #333;
+  }
+
+  .check {
+    color: #2ecc71; /* Zelená barva pro fajfku */
+    font-weight: bold;
+    margin-right: 10px; /* Mezera mezi fajfkou a textem */
+    width: 20px; /* Fixní šířka, aby text začínal pod sebou */
+  }
+
+  .text {
+    line-height: 1.4;
+  }
+
 
 .comming-wrapper {
   width: 100%;
@@ -926,6 +993,6 @@ export default function Home() {
         .pro-check { color: #00b4d8; border-color: #00b4d8; }
 
       `}</style>
-    </main>
+    </main >
   );
 }

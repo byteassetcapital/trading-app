@@ -1,0 +1,500 @@
+.container {
+    padding: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
+
+.header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Overview Section */
+.overview {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.contentGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.contentPanel {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15),
+        inset 0 0 20px rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.panelTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.25px;
+}
+
+/* Portfolio Distribution */
+.distributionList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.distributionItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.distributionInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.assetName {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.assetPercent {
+    font-size: 0.875rem;
+    color: var(--pink-mist);
+    font-weight: 600;
+}
+
+.progressBar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--night-bordeaux) 0%, var(--rosewood) 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.assetValue {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+}
+
+/* Performance List */
+.performanceList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.performanceItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.performanceItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(228, 158, 172, 0.2);
+}
+
+.performanceLabel {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    flex: 1;
+}
+
+.performanceValue {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ffffff;
+    flex: 1;
+    text-align: right;
+    margin-right: 1rem;
+}
+
+.performanceChange {
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.performanceChange.positive {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.performanceChange.negative {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* Section (for settings, funds, goals) */
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Settings Form */
+.settingsForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.input,
+.select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 0.875rem 1.25rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.input:focus,
+.select:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--pink-mist);
+    box-shadow: 0 0 0 3px rgba(228, 158, 172, 0.1);
+}
+
+.select {
+    cursor: pointer;
+}
+
+.toggleWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+
+.toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: 0.4s;
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+.toggle input:checked+.slider {
+    background: linear-gradient(135deg, var(--night-bordeaux) 0%, var(--rosewood) 100%);
+    border-color: var(--pink-mist);
+}
+
+.toggle input:checked+.slider:before {
+    transform: translateX(24px);
+}
+
+.toggleLabel {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.riskSlider {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.riskSlider input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.riskSlider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, var(--night-bordeaux) 0%, var(--rosewood) 100%);
+    border: 2px solid var(--pink-mist);
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.riskSlider input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, var(--night-bordeaux) 0%, var(--rosewood) 100%);
+    border: 2px solid var(--pink-mist);
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.riskLabels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.saveButton {
+    background: linear-gradient(135deg, var(--night-bordeaux) 0%, var(--rosewood) 100%);
+    color: #ffffff;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    border: 1px solid rgba(228, 158, 172, 0.4);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4),
+        inset 0 0 10px rgba(228, 158, 172, 0.1);
+    align-self: flex-start;
+}
+
+.saveButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(149, 77, 95, 0.4);
+    filter: brightness(1.1);
+}
+
+/* Funds Grid */
+.fundsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.fundAction {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.fundAction:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(228, 158, 172, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.fundIcon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--night-bordeaux) 0%, var(--rosewood) 100%);
+    border-radius: 16px;
+    color: var(--pink-mist);
+}
+
+.fundTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.fundDescription {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+}
+
+.fundButton {
+    background: rgba(228, 158, 172, 0.05);
+    border: 1px solid rgba(228, 158, 172, 0.25);
+    color: var(--pink-mist);
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.fundButton:hover {
+    background: rgba(149, 77, 95, 0.2);
+    border-color: var(--pink-mist);
+    color: #ffffff;
+    box-shadow: 0 0 20px rgba(149, 77, 95, 0.2);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .header {
+        margin-bottom: 1.5rem;
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .subtitle {
+        font-size: 0.875rem;
+    }
+
+    .metricsGrid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .contentGrid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .contentPanel {
+        padding: 1.5rem;
+    }
+
+    .panelTitle {
+        font-size: 1.125rem;
+    }
+
+    .fundsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .performanceItem {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .performanceValue {
+        text-align: left;
+        margin-right: 0;
+    }
+
+    .performanceChange {
+        align-self: flex-start;
+    }
+}
+
+/* Tablet Responsive */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        padding: 1.25rem;
+    }
+
+    .metricsGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .contentGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Desktop Optimization */
+@media (min-width: 1025px) {
+    .container {
+        padding: 2rem;
+    }
+
+    .metricsGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
