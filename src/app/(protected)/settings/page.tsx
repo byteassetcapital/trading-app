@@ -12,7 +12,14 @@ interface UserProfile {
     date_of_birth: string | null;
     nationality: string | null;
     phone: string | null; // Editable?
-    account_type: 'autonomous' | 'managed';
+    account_type: 'autonomous' | 'managed' | null;
+    // Stripe subscription fields
+    plan_type: 'autonomous' | 'managed' | null;
+    subscription_status: 'active' | 'past_due' | 'canceled' | 'incomplete' | 'trialing' | 'unpaid' | null;
+    subscription_price_id: string | null;
+    subscription_id: string | null;
+    stripe_customer_id: string | null;
+    access_until: string | null;
 }
 
 interface ExchangeConnection {
@@ -35,6 +42,7 @@ export default function SettingsPage() {
     const [apiKeyInput, setApiKeyInput] = useState('');
     const [apiSecretInput, setApiSecretInput] = useState('');
     const [selectedExchange, setSelectedExchange] = useState('binance');
+    const [portalLoading, setPortalLoading] = useState(false);
 
     useEffect(() => {
         async function fetchData() {
@@ -165,6 +173,61 @@ export default function SettingsPage() {
         }
     };
 
+    // Handle opening Stripe Customer Portal
+    const handleOpenPortal = async () => {
+        if (!user) return;
+        setPortalLoading(true);
+        try {
+            const response = await fetch('/api/stripe/portal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to open portal');
+            }
+
+            window.location.href = data.url;
+        } catch (error) {
+            console.error('Portal error:', error);
+            alert('Nepodařilo se otevřít správu předplatného.');
+        } finally {
+            setPortalLoading(false);
+        }
+    };
+
+    // Helper to get subscription status label
+    const getStatusLabel = (status: string | null) => {
+        switch (status) {
+            case 'active': return { label: 'Aktivní', color: '#22c55e' };
+            case 'trialing': return { label: 'Zkušební období', color: '#3b82f6' };
+            case 'past_due': return { label: 'Po splatnosti', color: '#f59e0b' };
+            case 'canceled': return { label: 'Zrušeno', color: '#ef4444' };
+            case 'incomplete': return { label: 'Neúplné', color: '#f59e0b' };
+            case 'unpaid': return { label: 'Nezaplaceno', color: '#ef4444' };
+            default: return { label: 'Žádné', color: '#6b7280' };
+        }
+    };
+
+    // Helper to get tier name from price ID
+    const getTierName = (priceId: string | null) => {
+        if (!priceId) return 'Žádný plán';
+        const priceMap: Record<string, string> = {
+            'price_1SnLEzCX3wuf0Ms8q7r93xEH': 'A1 (€19/měsíc)',
+            'price_1SnLoCCX3wuf0Ms8bYWtK9BP': 'A2 (€29/měsíc)',
+            'price_1SnLpwCX3wuf0Ms89rfUI0iA': 'A3 (€49/měsíc)',
+            'price_1SnLqCCX3wuf0Ms8XfATKTbg': 'A4 (€79/měsíc)',
+            'price_1SnNDbCX3wuf0Ms8QjmO5o84': 'A1 (€19/rok)',
+            'price_1SnNEhCX3wuf0Ms8fWT3Hnbo': 'A2 (€29/rok)',
+            'price_1SnNFkCX3wuf0Ms8VpcwjJzU': 'A3 (€49/rok)',
+            'price_1SnNGMCX3wuf0Ms8kmhe7YRv': 'A4 (€79/rok)',
+        };
+        return priceMap[priceId] || 'Autonomous Plan';
+    };
+
     if (loading) {
         return (
             <div className={styles.container}>
@@ -268,18 +331,88 @@ export default function SettingsPage() {
                     {activeSection === 'subscription' && (
                         <div className={styles.sectionContent}>
                             <div style={{ marginTop: '1.5rem' }}>
+                                {/* Current Plan Type */}
                                 <div className={styles.formGroup}>
-                                    <label className={styles.label}>Aktuální Plán</label>
+                                    <label className={styles.label}>Typ účtu</label>
                                     <div className={styles.readOnlyField} style={{ textTransform: 'capitalize' }}>
-                                        {profile?.account_type || 'Unknown'}
+                                        {profile?.plan_type === 'autonomous' ? 'Autonomous Trading' :
+                                            profile?.plan_type === 'managed' ? 'Managed Portfolio' :
+                                                'Managed (Základní)'}
                                     </div>
                                 </div>
 
+                                {/* Subscription Tier */}
                                 <div className={styles.formGroup}>
-                                    <label className={styles.label}>Změna plánu</label>
-                                    <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>
-                                        Tohle doděláme jindy
+                                    <label className={styles.label}>Aktuální plán</label>
+                                    <div className={styles.readOnlyField}>
+                                        {getTierName(profile?.subscription_price_id || null)}
                                     </div>
+                                </div>
+
+                                {/* Status */}
+                                <div className={styles.formGroup}>
+                                    <label className={styles.label}>Stav předplatného</label>
+                                    <div
+                                        className={styles.readOnlyField}
+                                        style={{
+                                            color: getStatusLabel(profile?.subscription_status || null).color,
+                                            fontWeight: 600
+                                        }}
+                                    >
+                                        {getStatusLabel(profile?.subscription_status || null).label}
+                                    </div>
+                                </div>
+
+                                {/* Access Until */}
+                                {profile?.access_until && (
+                                    <div className={styles.formGroup}>
+                                        <label className={styles.label}>Platnost do</label>
+                                        <div className={styles.readOnlyField}>
+                                            {new Date(profile.access_until).toLocaleDateString('cs-CZ', {
+                                                year: 'numeric',
+                                                month: 'long',
+                                                day: 'numeric'
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Action Buttons */}
+                                <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    {profile?.stripe_customer_id ? (
+                                        <button
+                                            className="btnPrimary"
+                                            onClick={handleOpenPortal}
+                                            disabled={portalLoading}
+                                            style={{ width: '100%' }}
+                                        >
+                                            {portalLoading ? 'Otevírám...' : 'Spravovat předplatné'}
+                                        </button>
+                                    ) : (
+                                        <a
+                                            href="/#pricing"
+                                            className="btnPrimary"
+                                            style={{
+                                                width: '100%',
+                                                display: 'block',
+                                                textAlign: 'center',
+                                                textDecoration: 'none'
+                                            }}
+                                        >
+                                            Získat Autonomous Plan
+                                        </a>
+                                    )}
+
+                                    {profile?.stripe_customer_id && profile?.subscription_status === 'active' && (
+                                        <p style={{
+                                            fontSize: '0.85rem',
+                                            color: 'rgba(255,255,255,0.5)',
+                                            textAlign: 'center',
+                                            margin: 0
+                                        }}>
+                                            Změna plánu, platební metody a zrušení předplatného je dostupné přes správu předplatného.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>

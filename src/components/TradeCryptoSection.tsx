@@ -2,89 +2,83 @@ import React from 'react';
 import Link from 'next/link';
 
 export default function TradeCryptoSection() {
-    return (
-        <section className="trade-crypto-section">
-            <div className="content-container">
-                <h2 className="title">Trade Crypto</h2>
-                <p className="subtitle">Seamless. Secure. Smart.</p>
+  return (
+    <section className="trade-crypto-section">
+      <div className="content-container">
+        <h2 className="title">Trade Crypto</h2>
+        <p className="subtitle">Seamless. Secure. Smart.</p>
 
-                <div className="cta-wrapper">
-                    <Link href="/register" className="btnPrimary start-trading-btn">
-                        START TRADING
-                    </Link>
-                </div>
+        <div className="cta-wrapper">
+          <Link href="/register" className="btnPrimary start-trading-btn">
+            START TRADING
+          </Link>
+        </div>
 
-                <div className="floating-icons">
-                    {/* Bitcoin */}
-                    <div className="icon-wrapper btc">
-                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M7 7h10.5a3.5 3.5 0 0 1 0 7H17v0h1a3.5 3.5 0 0 1 0 7H7V7z" />
-                            <path d="M12 7v14" />
-                            <path d="M11 4v3" />
-                            <path d="M11 21v3" />
-                            <path d="M15 4v3" />
-                            <path d="M15 21v3" />
-                        </svg>
-                    </div>
+        <div className="floating-icons">
+          {/* Bitcoin */}
+          <div className="icon-wrapper btc">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 7h10.5a3.5 3.5 0 0 1 0 7H17v0h1a3.5 3.5 0 0 1 0 7H7V7z" />
+              <path d="M12 7v14" />
+              <path d="M11 4v3" />
+              <path d="M11 21v3" />
+              <path d="M15 4v3" />
+              <path d="M15 21v3" />
+            </svg>
+          </div>
 
-                    {/* Ethereum */}
-                    <div className="icon-wrapper eth">
-                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M16 2L6 14l10 6 10-6L16 2z" />
-                            <path d="M16 30V20l10-6-10 16-10-16 10 6z" />
-                        </svg>
-                    </div>
+          {/* Ethereum */}
+          <div className="icon-wrapper eth">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 2L6 14l10 6 10-6L16 2z" />
+              <path d="M16 30V20l10-6-10 16-10-16 10 6z" />
+            </svg>
+          </div>
 
-                    {/* Litecoin */}
-                    <div className="icon-wrapper ltc">
-                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M10 6v14.5a1.5 1.5 0 0 0 1.5 1.5h10" />
-                            <path d="M9 14l8-4" />
-                        </svg>
-                    </div>
+          {/* Litecoin */}
+          <div className="icon-wrapper ltc">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 6v14.5a1.5 1.5 0 0 0 1.5 1.5h10" />
+              <path d="M9 14l8-4" />
+            </svg>
+          </div>
 
-                    {/* Ripple/XRP-ish */}
-                    <div className="icon-wrapper xrp">
-                        <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="16" cy="16" r="10" />
-                            <path d="M16 11a5 5 0 0 1 0 10 5 5 0 0 1 0-10" />
-                            <path d="M12 22l4 4 4-4" />
-                        </svg>
-                    </div>
+          {/* Ripple/XRP-ish */}
+          <div className="icon-wrapper xrp">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="16" cy="16" r="10" />
+              <path d="M16 11a5 5 0 0 1 0 10 5 5 0 0 1 0-10" />
+              <path d="M12 22l4 4 4-4" />
+            </svg>
+          </div>
 
-                    {/* Lightning/Flash */}
-                    <div className="icon-wrapper flash">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                        </svg>
-                    </div>
+          {/* Lightning/Flash */}
+          <div className="icon-wrapper flash">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+          </div>
 
-                    {/* Another generic coin */}
-                    <div className="icon-wrapper coin">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                            <path d="M12 18V6" />
-                        </svg>
-                    </div>
-                </div>
+          {/* Another generic coin */}
+          <div className="icon-wrapper coin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+              <path d="M12 18V6" />
+            </svg>
+          </div>
+        </div>
 
-                <div className="partners">
-                    <span className="partner-text">BINANCE</span>
-                    <span className="partner-dot">•</span>
-                    <span className="partner-text">COINBASE</span>
-                    <span className="partner-dot">•</span>
-                    <span className="partner-text">KRAKEN</span>
-                </div>
-            </div>
 
-            <style jsx>{`
+      </div>
+
+      <style jsx>{`
         .trade-crypto-section {
           position: relative;
           width: 100%;
           min-height: 500px;
           padding: 6rem 1.5rem;
-          background: radial-gradient(circle at center, #e49eac0a 0%,var(--background) 100%);
+          background: radial-gradient(circle at center, #e49eac 0%,var(--background) 0%);
           overflow: hidden;
           display: flex;
           align-items: center;
@@ -140,6 +134,7 @@ export default function TradeCryptoSection() {
            color: white;
            font-weight: 700;
            letter-spacing: 1px;
+          
         }
         
         .start-trading-btn:hover {
@@ -261,6 +256,6 @@ export default function TradeCryptoSection() {
          }
 
       `}</style>
-        </section>
-    );
+    </section>
+  );
 }

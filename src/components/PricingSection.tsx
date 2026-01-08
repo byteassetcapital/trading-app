@@ -4,6 +4,26 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { PlanPrice, PlanTier, SubscriptionPlan } from '@/types/pricing';
 
+// Price ID mapping for Stripe
+const PRICE_IDS: Record<string, Record<'monthly' | 'yearly', string>> = {
+    A1: {
+        monthly: 'price_1SnLEzCX3wuf0Ms8q7r93xEH',
+        yearly: 'price_1SnNDbCX3wuf0Ms8QjmO5o84',
+    },
+    A2: {
+        monthly: 'price_1SnLoCCX3wuf0Ms8bYWtK9BP',
+        yearly: 'price_1SnNEhCX3wuf0Ms8fWT3Hnbo',
+    },
+    A3: {
+        monthly: 'price_1SnLpwCX3wuf0Ms89rfUI0iA',
+        yearly: 'price_1SnNFkCX3wuf0Ms8VpcwjJzU',
+    },
+    A4: {
+        monthly: 'price_1SnLqCCX3wuf0Ms8XfATKTbg',
+        yearly: 'price_1SnNGMCX3wuf0Ms8kmhe7YRv',
+    },
+};
+
 export default function PricingSection() {
     const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
     const [loading, setLoading] = useState(true);
@@ -11,6 +31,58 @@ export default function PricingSection() {
     const [selectedAiTierCode, setSelectedAiTierCode] = useState<string>('A1');
     const [aiAccessPlan, setAiAccessPlan] = useState<SubscriptionPlan | null>(null);
     const [managedPlan, setManagedPlan] = useState<SubscriptionPlan | null>(null);
+    const [checkoutLoading, setCheckoutLoading] = useState(false);
+
+    // Get the selected Stripe price ID
+    const getSelectedPriceId = () => {
+        const tierPrices = PRICE_IDS[selectedAiTierCode];
+        if (!tierPrices) return null;
+        return tierPrices[billingCycle];
+    };
+
+    // Handle checkout for AI Access plan
+    const handleCheckout = async () => {
+        setCheckoutLoading(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (!user) {
+                // Redirect unauthenticated users to login
+                window.location.href = '/login?redirect=/pricing';
+                return;
+            }
+
+            const priceId = getSelectedPriceId();
+            if (!priceId) {
+                alert('Neplatná cenová úroveň');
+                return;
+            }
+
+            const response = await fetch('/api/stripe/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    priceId,
+                    userId: user.id,
+                    userEmail: user.email,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Checkout failed');
+            }
+
+            // Redirect to Stripe Checkout
+            window.location.href = data.url;
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('Nepodařilo se spustit platbu. Zkuste to prosím znovu.');
+        } finally {
+            setCheckoutLoading(false);
+        }
+    };
 
     useEffect(() => {
         async function fetchPlans() {
@@ -196,7 +268,13 @@ export default function PricingSection() {
                                 ))}
                             </ul>
                         </div>
-                        <button className="pricing-btn pro-btn">Get AI Access ›</button>
+                        <button
+                            className="pricing-btn pro-btn"
+                            onClick={handleCheckout}
+                            disabled={checkoutLoading}
+                        >
+                            {checkoutLoading ? 'Přesměrování...' : 'Get AI Access ›'}
+                        </button>
                     </div>
                 )}
 

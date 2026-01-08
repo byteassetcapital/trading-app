@@ -230,6 +230,8 @@ export default function Home() {
         </div>
       </section>
 
+      <TradeCryptoSection />
+
       {/* HOW IT WORKS SECTION */}
       <section className="how-it-works-section">
         <h2 className="section-title">Jak Funguje Náš systém</h2>
@@ -293,13 +295,13 @@ export default function Home() {
       </section>
 
 
-      <TradeCryptoSection />
+
 
 
 
       {/* TESTIMONIALS SECTION */}
       <TestimonialsSection />
-      <div style={{ display: 'none' }}>
+      <div >
         {/* PRICING SECTION */}
         <PricingSection />
         <div className="important-info">
@@ -442,8 +444,8 @@ export default function Home() {
           flex-direction: column;
           align-items: center;
           justify-content: center; /* Vertically center content */
-          min-height: 100vh; /* Full viewport height fallback */
-          min-height: 100dvh; /* Dynamic viewport height */
+          min-height: 70vh; /* Full viewport height fallback */
+          min-height: 60vh; /* Dynamic viewport height */
           background-color: var(--background);
         }
 
@@ -499,10 +501,10 @@ export default function Home() {
         /* --- LOGO SECTION --- */
         .image-section {
           width: 100%;
-          padding: 2rem 1.5rem;
+          padding: 1rem;
           display: flex;
           justify-content: center;
-          padding-bottom: 4rem;
+          padding-bottom: 3rem;
           background: var(--background);
         }
 

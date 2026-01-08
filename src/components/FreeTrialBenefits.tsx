@@ -42,7 +42,7 @@ const FreeTrialBenefits = () => {
             Co získáš s <span className="gradient-highlight">Free Trial</span>
           </h2>
           <p className="trial-subtitle">
-            Vyzkoušej našu platformu bez rizika a přesvědč se sám
+            Vyzkoušej naši platformu bez rizika a přesvědč se sám
           </p>
         </div>
 
