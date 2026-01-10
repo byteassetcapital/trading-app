@@ -3,6 +3,10 @@
 import { useState } from 'react';
 import Loader from "@/components/Loader";
 import UserDisplay from "@/components/UserDisplay";
+import SecondaryNav from "@/components/autonomous/SecondaryNav";
+import ApiSettings from "@/components/autonomous/ApiSettings";
+import styles from './page.module.css';
+
 import {
   RecentTrades,
   LiveTrades,
@@ -17,10 +21,10 @@ import {
   MainChart,
 } from "@/components/dashboard";
 
+export default function AutonomousPage() {
+  const [activeSection, setActiveSection] = useState('overview');
 
-
-
-export default function Dashboard() {
+  // Dashboard Loading States
   const [loadingStates, setLoadingStates] = useState({
     quickStats: true,
     liveTrades: true,
@@ -33,297 +37,195 @@ export default function Dashboard() {
     recentTrades: true,
   });
 
+  // Bot Settings Dummy State
+  const [bots, setBots] = useState([
+    { id: 1, name: 'BTC Notch', active: true },
+    { id: 2, name: 'BTC HFT Algo', active: false },
+    { id: 3, name: 'SOL Multi Trader', active: true },
+
+  ]);
+
   const handleLoaded = (key: keyof typeof loadingStates) => {
     setLoadingStates(prev => ({ ...prev, [key]: false }));
   };
 
   const isFullyLoaded = !Object.values(loadingStates).some(state => state);
 
-  return (
-    <div className="dashboard-container">
-      {/* Show Loader until everything is ready */}
-      {!isFullyLoaded && <Loader />}
+  const toggleBot = (id: number) => {
+    setBots(bots.map(b => b.id === id ? { ...b, active: !b.active } : b));
+  };
 
-      {/* Header */}
-      <header className="dash-header">
-        <div className="header-left">
-          <h1>Autonomní Trading</h1>
-          <span className="welcome-text">Trading Overview</span>
-        </div>
-        <div className="header-right">
-          <UserDisplay />
-        </div>
-      </header>
 
-      {/* Quick Stats */}
+  // Render Functions
+  const renderOverview = () => (
+    <>
       <section className="section-quick-stats">
         <QuickStats onLoaded={() => handleLoaded('quickStats')} />
       </section>
 
-      {/* Live Trades */}
+      <div className="grid-item pnl-area" style={{ marginBottom: '1.5rem' }}>
+        <div className="pnl-grid">
+          <UnrealizedPnL onLoaded={() => handleLoaded('unrealizedPnL')} />
+          <RealizedPnL onLoaded={() => handleLoaded('realizedPnL')} />
+          <AccountBalance onLoaded={() => handleLoaded('accountBalance')} />
+          <PnLAnalysis />
+        </div>
+      </div>
+
       <div className="grid-item live-trades-area" style={{ marginBottom: '1.5rem' }}>
         <LiveTrades onLoaded={() => handleLoaded('liveTrades')} />
       </div>
 
-      {/* Waiting Trades */}
       <div className="grid-item waiting-trades-area">
         <WaitingTrades onLoaded={() => handleLoaded('waitingTrades')} />
       </div>
 
-
-
-
-
-      {/* Main Grid Layout */}
-      <div className="dash-grid">
-
-
-        {/* Watchlist / Mini Charts */}
-        <div className="grid-item chart-area">
-          <div className="charts-stack">
-            <MainChart />
-            <Watchlist onLoaded={() => handleLoaded('watchlist')} />
-          </div>
-        </div>
-
-        {/* P&L Section - Mobile: stacked, Desktop: side by side */}
-        <div className="grid-item pnl-area">
-          <div className="pnl-grid">
-            <UnrealizedPnL onLoaded={() => handleLoaded('unrealizedPnL')} />
-            <RealizedPnL onLoaded={() => handleLoaded('realizedPnL')} />
-            <PnLAnalysis />
-            <AccountBalance onLoaded={() => handleLoaded('accountBalance')} />
-          </div>
-        </div>
-
-
-
-        {/* Active Bots */}
-        <div className="grid-item bots-area" style={{ display: 'none' }}>
-          <ActiveBots onLoaded={() => handleLoaded('activeBots')} />
-        </div>
-
+      <div className="charts-stack" style={{ display: 'none' }}>
+        <MainChart />
+        <Watchlist onLoaded={() => handleLoaded('watchlist')} />
       </div>
 
-      {/* Recent Trades */}
-      <div className="grid-item trades-area">
+      <div className="grid-item trades-area" style={{ paddingTop: '1.5rem' }}>
         <RecentTrades onLoaded={() => handleLoaded('recentTrades')} />
       </div>
 
+      <div className="grid-item bots-area">
+        <ActiveBots onLoaded={() => handleLoaded('activeBots')} />
+      </div>
+
+      {/* Preservation of original styles for grid layout */}
       <style jsx>{`
-
-
-        .dashboard-container {
-          position: relative;
-          z-index: 1; /* Aby obsah byl nad glow efekty */
-          overflow: hidden;
-          /* ... zbytek tvého paddingu atd. ... */
-        }
-
         .bg-glow-1, .bg-glow-2 {
           position: fixed;
           width: 400px;
           height: 400px;
           border-radius: 50%;
           filter: blur(80px);
-          z-index: -1; /* Musí být pod obsahem */
-          opacity: 0.15; /* Jemné, aby to nerušilo */
+          z-index: -1;
+          opacity: 0.15;
           pointer-events: none;
         }
+        .bg-glow-1 { background: #3f5efb; top: 10%; left: -10%; }
+        .bg-glow-2 { background: #fc466b; bottom: 10%; right: -10%; }
 
-        .bg-glow-1 {
-          background: #3f5efb;
-          top: 10%;
-          left: -10%;
-        }
-
-        .bg-glow-2 {
-          background: #fc466b;
-          bottom: 10%;
-          right: -10%;
-        }
-
-        /* ============================================
-           MOBILE FIRST STYLES (< 480px)
-           ============================================ */
+        .section-quick-stats { margin-bottom: 1.5rem; }
         
-        .dashboard-container {
-          padding: 6rem 1rem 2rem;
-          min-height: 100vh;
-          max-width: 1400px;
-          margin: 0 auto;
-        }
-
-        /* Header */
-        .dash-header {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          margin-bottom: 1.5rem;
-        }
-
-        .header-left h1 {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: #fff;
-          margin: 0;
-        }
-
-        .welcome-text {
-          font-size: 0.85rem;
-          color: rgba(255, 255, 255, 0.5);
-        }
-
-        .header-right {
-          display: flex;
-          align-items: center;
-        }
-
-        /* Quick Stats Section */
-        .section-quick-stats {
-          margin-bottom: 1.5rem;
-        }
-
-        /* Main Grid - Mobile: single column stack */
-        .dash-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          padding-top: 12px;
-        }
-
-        .grid-item {
-          width: 100%;
-        }
-
-        /* P&L Grid - Mobile: stacked */
-        .pnl-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        /* ============================================
-           SMALL TABLETS (480px+)
-           ============================================ */
-        @media (min-width: 480px) {
-          .dashboard-container {
-            padding: 7rem 1.5rem 2rem;
-          }
-
-          .dash-header {
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
-          }
-
-          .dash-grid {
-            gap: 1.25rem;
-          }
-        }
-
-        /* ============================================
-           TABLETS (768px+)
-           ============================================ */
+        /* Original Mobile First Styles */
+        .grid-item { width: 100%; }
+        .pnl-grid { display: flex; flex-direction: column; gap: 1rem; }
+        
         @media (min-width: 768px) {
-          .dashboard-container {
-            padding: 8rem 2rem 2rem;
-          }
-
-          .header-left h1 {
-            font-size: 1.75rem;
-          }
-
-          /* P&L side by side */
-          .pnl-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.25rem;
-          }
-
-          .dash-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-          }
-
-          .balance-area {
-            grid-column: span 1;
-            padding-top: 12px;
-            padding-bottom: 12px;
-          }
-
-          .chart-area {
-            grid-column: span 2;
-          }
-
-          .pnl-area {
-            grid-column: span 2;
-          }
-
-          .bots-area {
-            grid-column: span 1;
-            display: none;
-          }
-
-          .trades-area {
-            grid-column: span 1;
-          }
+           .pnl-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+           .dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
         }
 
-        /* ============================================
-           DESKTOP (1024px+)
-           ============================================ */
         @media (min-width: 1024px) {
-          .dash-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            grid-template-rows: auto auto;
-            gap: 12px;
-          }
-
-          .pnl-area {
-            grid-column: 1 / 2;
-            grid-row: 1 / 2;
-          }
-
-          /* Force PnL grid to be a vertical stack in the sidebar */
-          .pnl-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-          }
-
-          .chart-area {
-            grid-column: 2 / 3;
-            grid-row: 1 / 2;
-          }
-
-          /* Active Bots - Full width below the main columns */
-          .bots-area {
-            grid-column: 1 / 3;
-            grid-row: 2 / 3;
-            display: none;
-          }
+           .dash-grid { display: grid; grid-template-columns: 350px 1fr; grid-template-rows: auto auto; gap: 12px; }
+           .pnl-area { grid-column: 1 / -1; grid-row: 2 / 3; width: 100%; }
+           .pnl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; }
+           .bots-area { grid-column: 1 / -1; grid-row: 3 / 4; padding-top: 1.5rem; }
         }
-
-        /* ============================================
-           LARGE DESKTOP (1280px+)
-           ============================================ */
-        @media (min-width: 1280px) {
-          /* Maintain the 2-column layout from 1024px+ */
-          
-          .header-left h1 {
-            font-size: 2rem;
-          }
-        }
-
-        .charts-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-        }
+        
+        .charts-stack { display: flex; flex-direction: column; gap: 1.25rem; }
       `}</style>
-    </div >
+    </>
+  );
+
+  const renderTradingSettings = () => (
+    <div className={styles.section}>
+      <div className={styles.contentPanel}>
+        <h3 className={styles.panelTitle}>Nastavení Botů</h3>
+        <div className={styles.botList}>
+          {bots.map(bot => (
+            <div key={bot.id} className={styles.botItem}>
+              <div className={styles.botInfo}>
+                <span className={styles.botName}>{bot.name}</span>
+                <span className={styles.botStatus}>{bot.active ? 'Běží' : 'Zastaveno'}</span>
+              </div>
+              <label className={styles.toggleLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.toggleInput}
+                  checked={bot.active}
+                  onChange={() => toggleBot(bot.id)}
+                />
+                <div className={styles.toggleSwitch}></div>
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderFunds = () => (
+    <div className={styles.section}>
+      <div className={styles.contentPanel}>
+        <h3 className={styles.panelTitle}>Správa Prostředků</h3>
+        <div className={styles.fundsGrid}>
+          <div className={styles.fundAction}>
+            <div className={styles.fundIcon}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </div>
+            <h4 className={styles.fundTitle}>Vklad</h4>
+            <p className={styles.fundDescription}>Přidat finanční prostředky do portfolia</p>
+            <button className={styles.fundButton}>Vložit</button>
+          </div>
+          <div className={styles.fundAction}>
+            <div className={styles.fundIcon}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </div>
+            <h4 className={styles.fundTitle}>Výběr</h4>
+            <p className={styles.fundDescription}>Vybrat prostředky z portfolia</p>
+            <button className={styles.fundButton}>Vybrat</button>
+          </div>
+          <div className={styles.fundAction}>
+            <div className={styles.fundIcon}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="17 1 21 5 17 9" />
+                <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                <polyline points="7 23 3 19 7 15" />
+                <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+              </svg>
+            </div>
+            <h4 className={styles.fundTitle}>Převod</h4>
+            <p className={styles.fundDescription}>Převést mezi účty</p>
+            <button className={styles.fundButton}>Převést</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className={styles.container}>
+      {/* Background Glows */}
+      <div className="bg-glow-1"></div>
+      <div className="bg-glow-2"></div>
+
+      {activeSection === 'overview' && !isFullyLoaded && <Loader />}
+
+      <header className={styles.header}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <div>
+            <h1 className={styles.title}>Autonomní Trading</h1>
+            <span className={styles.subtitle}>Trading Overview & Management</span>
+          </div>
+          <UserDisplay />
+        </div>
+
+        <SecondaryNav activeSection={activeSection} onSectionChange={setActiveSection} />
+      </header>
+
+      {activeSection === 'overview' && renderOverview()}
+      {activeSection === 'trading_settings' && renderTradingSettings()}
+      {activeSection === 'funds' && renderFunds()}
+      {activeSection === 'api' && <ApiSettings />}
+    </div>
   );
 }

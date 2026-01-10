@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { getQuickStats, QuickStatsData } from '@/app/actions/trading';
 
 interface StatItem {
@@ -21,6 +21,7 @@ const initialStats: StatItem[] = [
 const ASSETS = ['ALL', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'BTCUSDC', 'ETHUSDC'];
 
 export default function QuickStats({ onLoaded }: { onLoaded?: () => void }) {
+  const supabase = createClient();
   const [stats, setStats] = useState<StatItem[]>(initialStats);
   const [loading, setLoading] = useState(true);
   const [assetFilter, setAssetFilter] = useState('ALL');

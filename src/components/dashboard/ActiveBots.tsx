@@ -20,10 +20,10 @@ interface ActiveBotsProps {
 
 // Mock data
 const mockBots: Bot[] = [
-  { id: '1', name: 'Grid Bot #1', strategy: 'BTC/USDT Grid', status: 'running', profit: 1250.50, profitPercent: 12.5, trades24h: 45, winRate: 68 },
-  { id: '2', name: 'DCA Bot', strategy: 'ETH Weekly DCA', status: 'running', profit: 890.20, profitPercent: 8.9, trades24h: 3, winRate: 100 },
-  { id: '3', name: 'Scalper Pro', strategy: 'SOL Scalping', status: 'paused', profit: -120.00, profitPercent: -2.4, trades24h: 0, winRate: 45 },
-  { id: '4', name: 'Arbitrage #2', strategy: 'Cross-Exchange', status: 'running', profit: 340.80, profitPercent: 5.2, trades24h: 128, winRate: 92 },
+  { id: '1', name: 'BTC Notch', strategy: 'BTC/USDC Notch', status: 'running', profit: 1250.50, profitPercent: 12.5, trades24h: 45, winRate: 78 },
+  { id: '2', name: 'BTC HFT Algo', strategy: 'BTC HFT Algo', status: 'running', profit: 890.20, profitPercent: 8.9, trades24h: 3, winRate: 95 },
+  { id: '3', name: 'SOL Multi Trader', strategy: 'SOL Multi Trader', status: 'paused', profit: -120.00, profitPercent: -2.4, trades24h: 0, winRate: 59 },
+
 ];
 
 export default function ActiveBots({ bots = mockBots, onLoaded }: ActiveBotsProps) {

@@ -22,26 +22,19 @@ interface UserProfile {
     access_until: string | null;
 }
 
-interface ExchangeConnection {
-    user_id?: string;
-    exchange_platform: 'binance' | 'bitget' | 'coinbase' | string;
-    api_key_encrypted: string | null;
-    api_secret_encrypted: string | null;
-}
+
 
 export default function SettingsPage() {
     const [user, setUser] = useState<any>(null);
     const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [connection, setConnection] = useState<ExchangeConnection | null>(null);
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [activeSection, setActiveSection] = useState<string | null>('profile');
 
     // Form states
     const [phoneInput, setPhoneInput] = useState('');
-    const [apiKeyInput, setApiKeyInput] = useState('');
-    const [apiSecretInput, setApiSecretInput] = useState('');
-    const [selectedExchange, setSelectedExchange] = useState('binance');
+
     const [portalLoading, setPortalLoading] = useState(false);
 
     useEffect(() => {
@@ -77,23 +70,7 @@ export default function SettingsPage() {
                     setPhoneInput(profileData.phone || '');
                 }
 
-                // 3. Get Exchange Connection
-                // Assuming user_id column here
-                const { data: connectionData, error: connectionError } = await supabase
-                    .from('user_exchange_connections')
-                    .select('*')
-                    .eq('user_id', user.id) // Assuming user_id column for connections
-                    .maybeSingle();
 
-                if (connectionData) {
-                    setConnection(connectionData);
-                    setSelectedExchange(connectionData.exchange_platform || 'binance');
-                    // We usually don't populate the inputs with the encrypted key directly for security, 
-                    // but the user asked to see "Vlořžte API key", implying setting it.
-                    // If we have it, maybe placeholder?
-                    // "Jen zobrazeno" was NOT said for this. "Poté načtení: Vlořžte API key" -> Load: inputs.
-                    // I'll leave inputs empty to imply "Update" or show placeholder "******"
-                }
 
             } catch (err) {
                 console.error('Unexpected error fetching settings:', err);
@@ -130,48 +107,7 @@ export default function SettingsPage() {
         }
     };
 
-    const updateConnection = async () => {
-        if (!user) return;
-        setSaving(true);
-        try {
-            // Check if exists
-            if (connection) {
-                const { error } = await supabase
-                    .from('user_exchange_connections')
-                    .update({
-                        exchange_platform: selectedExchange,
-                        api_key_encrypted: apiKeyInput || connection.api_key_encrypted, // Only update if provided
-                        api_secret_encrypted: apiSecretInput || connection.api_secret_encrypted
-                    })
-                    .eq('user_id', user.id); // Assuming PK might be ID, but standard use is updating by user_id
-                if (error) throw error;
-            } else {
-                // Insert
-                const { error } = await supabase
-                    .from('user_exchange_connections')
-                    .insert({
-                        user_id: user.id,
-                        exchange_platform: selectedExchange,
-                        api_key_encrypted: apiKeyInput,
-                        api_secret_encrypted: apiSecretInput
-                    });
-                if (error) throw error;
-            }
-            alert('API připojení uloženo');
-            // Refresh data
-            const { data } = await supabase.from('user_exchange_connections').select('*').eq('user_id', user.id).single();
-            if (data) setConnection(data);
 
-            setApiKeyInput('');
-            setApiSecretInput('');
-
-        } catch (err) {
-            console.error('Error updating connection:', err);
-            alert('Chyba při ukládání API');
-        } finally {
-            setSaving(false);
-        }
-    };
 
     // Handle opening Stripe Customer Portal
     const handleOpenPortal = async () => {
@@ -441,65 +377,7 @@ export default function SettingsPage() {
                     )}
                 </div>
 
-                {/* 4. Připojení API */}
-                <div className={styles.section}>
-                    <div className={styles.sectionHeader} onClick={() => toggleSection('api')}>
-                        <span className={styles.sectionTitle}>
-                            Připojení API
-                        </span>
-                        <svg
-                            className={`${styles.chevron} ${activeSection === 'api' ? styles.open : ''}`}
-                            width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-                        >
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </div>
 
-                    {activeSection === 'api' && (
-                        <div className={styles.sectionContent}>
-                            <div style={{ marginTop: '1.5rem' }}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>Výběr burzy</label>
-                                    <select
-                                        className={styles.select}
-                                        value={selectedExchange}
-                                        onChange={(e) => setSelectedExchange(e.target.value)}
-                                    >
-                                        <option value="binance">Binance</option>
-                                        <option value="bitget">Bitget</option>
-                                        <option value="coinbase">Coinbase</option>
-                                    </select>
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>API Key</label>
-                                    <input
-                                        type="text"
-                                        className={styles.input}
-                                        value={apiKeyInput}
-                                        onChange={(e) => setApiKeyInput(e.target.value)}
-                                        placeholder={connection?.api_key_encrypted ? "Klikněte pro změnu klíče" : "Vložte API Key"}
-                                    />
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label className={styles.label}>Secret Key</label>
-                                    <input
-                                        type="password"
-                                        className={styles.input}
-                                        value={apiSecretInput}
-                                        onChange={(e) => setApiSecretInput(e.target.value)}
-                                        placeholder={connection?.api_secret_encrypted ? "Klikněte pro změnu klíče" : "Vložte Secret Key"}
-                                    />
-                                </div>
-
-                                <button className="btnPrimary" style={{ width: '100%', display: 'block' }} onClick={updateConnection} disabled={saving}>
-                                    {saving ? 'Ukládám...' : 'Uložit připojení'}
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </div>
 
             </div>
         </div>

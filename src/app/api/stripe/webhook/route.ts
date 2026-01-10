@@ -13,6 +13,7 @@ async function updateUserSubscription(
 ) {
     const priceId = subscription.items.data[0]?.price?.id;
     const tierInfo = priceId ? getTierFromPriceId(priceId) : null;
+    const tierCode = subscription.metadata?.tier_code || tierInfo?.tierCode || null;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const subAny = subscription as any;
@@ -28,6 +29,7 @@ async function updateUserSubscription(
             subscription_status: subscription.status,
             subscription_price_id: priceId || null,
             plan_type: 'autonomous',
+            tier_code: tierCode,
             access_until: currentPeriodEnd,
             trial_ends_at: subscription.trial_end
                 ? new Date(subscription.trial_end * 1000).toISOString()
@@ -40,7 +42,7 @@ async function updateUserSubscription(
         throw error;
     }
 
-    console.log(`Updated subscription for user ${userId}: ${subscription.status}`);
+    console.log(`Updated subscription for user ${userId}: ${subscription.status}, tier: ${tierCode}`);
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {

@@ -284,7 +284,7 @@ export default function Dashboard() {
           overflow: hidden;
           text-decoration: none;
           transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+          box-shadow: 0 8px 32px rgba(230, 0, 0, 0.2);
         }
 
         .nav-card::before {
@@ -386,6 +386,7 @@ export default function Dashboard() {
           display: flex;
           align-items: center;
           justify-content: center;
+          color: white;
         }
 
         .icon-glow {
@@ -684,6 +685,7 @@ export default function Dashboard() {
         .plan-footer {
           padding-top: 1rem;
           border-top: 1px solid rgba(255, 255, 255, 0.08);
+          color: white;
         }
 
         .view-details-btn {

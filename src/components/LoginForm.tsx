@@ -1,16 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 
 export default function LoginForm() {
+  const supabase = createClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Store plan selection from URL parameters
+  const [returnPlan, setReturnPlan] = useState<string | null>(null);
+  const [returnBilling, setReturnBilling] = useState<string | null>(null);
+  const [shouldRedirectToCheckout, setShouldRedirectToCheckout] = useState(false);
+
+  // Check URL parameters on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    const billing = params.get('billing');
+    const redirect = params.get('redirect');
+
+    if (plan && billing && redirect === 'checkout') {
+      setReturnPlan(plan);
+      setReturnBilling(billing);
+      setShouldRedirectToCheckout(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +45,17 @@ export default function LoginForm() {
 
       if (signInError) throw signInError;
 
-      router.push("/dashboard");
+      // If user came from pricing, redirect back with plan selection
+      if (shouldRedirectToCheckout && returnPlan && returnBilling) {
+        const params = new URLSearchParams({
+          plan: returnPlan,
+          billing: returnBilling,
+          redirect: 'checkout'
+        });
+        router.push(`/?${params.toString()}`);
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err: any) {
       setError(err.message || "Nepodařilo se přihlásit");
     } finally {
@@ -70,7 +100,14 @@ export default function LoginForm() {
         </form>
 
         <div className="footer-links">
-          <Link href="/register">Vytvořit účet</Link>
+          <Link
+            href={shouldRedirectToCheckout && returnPlan && returnBilling
+              ? `/register?plan=${returnPlan}&billing=${returnBilling}&redirect=checkout`
+              : "/register"
+            }
+          >
+            Vytvořit účet
+          </Link>
           <Link href="#">Zapomněli jste heslo?</Link>
         </div>
       </div>

@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { getAccountData, AccountData } from '@/app/actions/trading';
 
 export default function AccountBalance({ onLoaded }: { onLoaded?: () => void }) {
+  const supabase = createClient();
   const [data, setData] = useState<AccountData | null>(null);
   const [loading, setLoading] = useState(true);
 

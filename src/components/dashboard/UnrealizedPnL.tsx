@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { getAccountData, PositionItem } from '@/app/actions/trading';
 
 export default function UnrealizedPnL({ onLoaded }: { onLoaded?: () => void }) {
+  const supabase = createClient();
   const [positions, setPositions] = useState<PositionItem[]>([]);
   const [totalPnL, setTotalPnL] = useState(0);
   const [loading, setLoading] = useState(true);

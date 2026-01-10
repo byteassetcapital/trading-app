@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "../lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 
 export default function RegisterForm() {
+  const supabase = createClient();
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -22,6 +23,25 @@ export default function RegisterForm() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Store plan selection from URL parameters
+  const [returnPlan, setReturnPlan] = useState<string | null>(null);
+  const [returnBilling, setReturnBilling] = useState<string | null>(null);
+  const [shouldRedirectToCheckout, setShouldRedirectToCheckout] = useState(false);
+
+  // Check URL parameters on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    const billing = params.get('billing');
+    const redirect = params.get('redirect');
+
+    if (plan && billing && redirect === 'checkout') {
+      setReturnPlan(plan);
+      setReturnBilling(billing);
+      setShouldRedirectToCheckout(true);
+    }
+  }, []);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,7 +81,7 @@ export default function RegisterForm() {
       // 2. MANUALLY CREATE PROFILE - fuck the trigger
       const { error: profileError } = await supabase
         .from('user_profiles')
-        .insert({
+        .upsert({
           id: authData.user.id,
           first_name: firstName || null,
           last_name: lastName || null,
@@ -91,7 +111,17 @@ export default function RegisterForm() {
 
       // 3. Success redirect
       if (authData.session) {
-        router.push("/dashboard");
+        // If user came from pricing, redirect back with plan selection
+        if (shouldRedirectToCheckout && returnPlan && returnBilling) {
+          const params = new URLSearchParams({
+            plan: returnPlan,
+            billing: returnBilling,
+            redirect: 'checkout'
+          });
+          router.push(`/?${params.toString()}`);
+        } else {
+          router.push("/dashboard");
+        }
       } else {
         router.push("/login?checkEmail=true");
       }
@@ -248,7 +278,13 @@ export default function RegisterForm() {
 
         <p className="footer-text">
           Already have an account?{" "}
-          <Link href="/login" className="link">
+          <Link
+            href={shouldRedirectToCheckout && returnPlan && returnBilling
+              ? `/login?plan=${returnPlan}&billing=${returnBilling}&redirect=checkout`
+              : "/login"
+            }
+            className="link"
+          >
             Log In
           </Link>
         </p>

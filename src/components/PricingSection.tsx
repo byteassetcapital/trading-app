@@ -44,41 +44,71 @@ export default function PricingSection() {
     const handleCheckout = async () => {
         setCheckoutLoading(true);
         try {
+            console.log('🔵 Starting checkout...');
+            console.log('Selected tier:', selectedAiTierCode);
+            console.log('Billing cycle:', billingCycle);
+
             const { data: { user } } = await supabase.auth.getUser();
 
             if (!user) {
-                // Redirect unauthenticated users to login
-                window.location.href = '/login?redirect=/pricing';
+                console.log('❌ User not authenticated, redirecting to register');
+                // Redirect unauthenticated users to register with selected plan info
+                const params = new URLSearchParams({
+                    plan: selectedAiTierCode,
+                    billing: billingCycle,
+                    redirect: 'checkout'
+                });
+                window.location.href = `/register?${params.toString()}`;
                 return;
             }
 
+            console.log('✅ User authenticated:', user.id);
+
             const priceId = getSelectedPriceId();
+            console.log('Price ID:', priceId);
+
             if (!priceId) {
-                alert('Neplatná cenová úroveň');
+                console.error('❌ No price ID found for tier:', selectedAiTierCode, 'billing:', billingCycle);
+                alert(`Neplatná cenová úroveň: ${selectedAiTierCode} (${billingCycle})`);
+                setCheckoutLoading(false);
                 return;
             }
+
+            const requestBody = {
+                priceId,
+                userId: user.id,
+                userEmail: user.email,
+                tierCode: selectedAiTierCode,
+                billingCycle: billingCycle,
+            };
+
+            console.log('📤 Sending checkout request:', requestBody);
 
             const response = await fetch('/api/stripe/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    priceId,
-                    userId: user.id,
-                    userEmail: user.email,
-                }),
+                body: JSON.stringify(requestBody),
             });
 
+            console.log('📥 Response status:', response.status);
             const data = await response.json();
+            console.log('📥 Response data:', data);
 
             if (!response.ok) {
                 throw new Error(data.error || 'Checkout failed');
             }
 
+            if (!data.url) {
+                throw new Error('No checkout URL returned from API');
+            }
+
+            console.log('✅ Redirecting to Stripe checkout:', data.url);
             // Redirect to Stripe Checkout
             window.location.href = data.url;
         } catch (error) {
-            console.error('Checkout error:', error);
-            alert('Nepodařilo se spustit platbu. Zkuste to prosím znovu.');
+            console.error('❌ Checkout error:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            alert(`Nepodařilo se spustit platbu: ${errorMessage}\n\nZkuste to prosím znovu.`);
         } finally {
             setCheckoutLoading(false);
         }
@@ -124,6 +154,33 @@ export default function PricingSection() {
             }
         }
         fetchPlans();
+    }, []);
+
+    // Check for returning user from registration with plan parameters
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const plan = params.get('plan');
+        const billing = params.get('billing') as 'monthly' | 'yearly' | null;
+        const shouldCheckout = params.get('redirect') === 'checkout';
+
+        if (plan && billing) {
+            setSelectedAiTierCode(plan);
+            setBillingCycle(billing);
+
+            // If user should checkout and is authenticated, automatically trigger checkout
+            if (shouldCheckout) {
+                // Clean URL
+                window.history.replaceState({}, '', window.location.pathname);
+
+                // Wait a bit for the state to update, then check auth and trigger checkout
+                setTimeout(async () => {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (user) {
+                        handleCheckout();
+                    }
+                }, 500);
+            }
+        }
     }, []);
 
     // Helper to get price for the selected AI Tier

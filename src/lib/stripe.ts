@@ -25,7 +25,7 @@ export const stripe = {
 // Price ID mapping for Autonomous plan tiers
 export const PRICE_IDS = {
     // Monthly prices
-    A1_MONTHLY: 'price_1SnLEzCX3wuf0Ms8q7r93xEH', // €19/month
+    A1_MONTHLY: 'price_1So1nKCX3wuf0Ms8yHcwLfbL', // €19/month
     A2_MONTHLY: 'price_1SnLoCCX3wuf0Ms8bYWtK9BP', // €29/month
     A3_MONTHLY: 'price_1SnLpwCX3wuf0Ms89rfUI0iA', // €49/month
     A4_MONTHLY: 'price_1SnLqCCX3wuf0Ms8XfATKTbg', // €79/month

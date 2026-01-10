@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { getDailyPnL, DailyPnLData } from '@/app/actions/trading';
 import {
     BarChart,
@@ -15,6 +15,7 @@ import {
 } from 'recharts';
 
 export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
+    const supabase = createClient();
     const [data, setData] = useState<DailyPnLData[]>([]);
     const [days, setDays] = useState<number>(7);
     const [loading, setLoading] = useState(true);
@@ -51,9 +52,24 @@ export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
             const pnl = payload[0].value;
             const date = payload[0].payload.date;
             return (
-                <div className="custom-tooltip">
-                    <p className="tooltip-date">{date}</p>
-                    <p className={`tooltip-value ${pnl >= 0 ? 'positive' : 'negative'}`}>
+                <div className="custom-tooltip" style={{
+                    backgroundColor: 'rgba(20, 20, 30, 0.95)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)'
+                }}>
+                    <p className="tooltip-date" style={{
+                        margin: '0 0 4px 0',
+                        fontSize: '0.75rem',
+                        color: 'rgba(255, 255, 255, 0.8)'
+                    }}>{date}</p>
+                    <p className="tooltip-value" style={{
+                        margin: 0,
+                        fontSize: '0.9rem',
+                        fontWeight: 600,
+                        color: pnl >= 0 ? '#00ff88' : '#ff3c3c'
+                    }}>
                         {pnl >= 0 ? '+' : ''}{pnl.toFixed(2)} USDT
                     </p>
                 </div>
@@ -94,16 +110,16 @@ export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
                                 dataKey="dayLabel"
                                 axisLine={false}
                                 tickLine={false}
-                                tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }}
+                                tick={{ fill: 'rgba(104, 104, 104, 1)', fontSize: 10 }}
                             />
                             <YAxis
                                 hide
                             />
-                            <Tooltip cursor={{ fill: 'rgba(255,255,255,0.05)' }} content={<CustomTooltip />} />
-                            <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
+                            <Tooltip cursor={{ fill: 'rgba(255, 255, 255, 0.29)' }} content={<CustomTooltip />} />
+                            <ReferenceLine y={0} stroke="rgba(255, 255, 255, 0.19)" />
                             <Bar dataKey="pnl" radius={[2, 2, 0, 0]}>
                                 {data.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.pnl >= 0 ? '#00ff88' : '#ff3c3c'} />
+                                    <Cell key={`cell-${index}`} fill={entry.pnl >= 0 ? '#0095f8ff' : '#b90000ff'} />
                                 ))}
                             </Bar>
                         </BarChart>
@@ -118,6 +134,7 @@ export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
           height: 100%;
           min-height: 200px;
           padding: 1rem;
+          
         }
 
         .pnl-header {
@@ -130,7 +147,7 @@ export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
         .pnl-title {
           font-size: 0.9rem;
           font-weight: 600;
-          color: #fff;
+          color: #ffffffff;
         }
 
         .pnl-toggles {
@@ -153,7 +170,7 @@ export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
         }
 
         .toggle-btn.active {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(209, 209, 209, 0.1);
           color: #fff;
         }
 
@@ -169,32 +186,9 @@ export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
             align-items: center;
             justify-content: center;
             font-size: 0.8rem;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255, 255, 255, 1);
         }
 
-        .custom-tooltip {
-            background: rgba(18, 18, 24, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px;
-            border-radius: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        }
-
-        .tooltip-date {
-            margin: 0;
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.5);
-            margin-bottom: 2px;
-        }
-
-        .tooltip-value {
-            margin: 0;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .tooltip-value.positive { color: #00ff88; }
-        .tooltip-value.negative { color: #ff3c3c; }
 
       `}</style>
         </div>

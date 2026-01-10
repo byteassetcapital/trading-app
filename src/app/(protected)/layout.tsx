@@ -1,19 +1,36 @@
-"use client";
 import React from 'react';
 import Sidebar from '@/components/Sidebar';
 import styles from './layout.module.css';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function ProtectedLayout({
+export default async function ProtectedLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    // Ideally, add auth check here or middleware
-    // For now, we assume middleware handles protection or we just show the layout
+    const supabase = await createClient();
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        redirect('/login');
+    }
+
+    let userProfile = null;
+    const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('first_name, last_name')
+        .eq('id', user.id)
+        .single();
+
+    userProfile = profile;
 
     return (
         <div className={styles.protectedLayout}>
-            <Sidebar />
+            <Sidebar userProfile={userProfile} />
             <main className={styles.mainContent}>
                 {children}
             </main>

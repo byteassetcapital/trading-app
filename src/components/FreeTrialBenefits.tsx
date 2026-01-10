@@ -11,6 +11,11 @@ const FreeTrialBenefits = () => {
       gradient: "from-purple-500/20 to-pink-500/20"
     },
     {
+      icon: "💰",
+      text: "Vše co vydělá bot, obdržíš na účet",
+      gradient: "from-violet-500/20 to-purple-500/20"
+    },
+    {
       icon: "💳",
       text: "Žádná platební karta",
       gradient: "from-blue-500/20 to-cyan-500/20"
@@ -30,6 +35,7 @@ const FreeTrialBenefits = () => {
       text: "Žádné ruční obchodování",
       gradient: "from-violet-500/20 to-purple-500/20"
     }
+
   ];
 
   return (

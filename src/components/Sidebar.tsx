@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import styles from './Sidebar.module.css';
 
 // Ikony (beze změny, jen pro úplnost)
@@ -45,7 +45,15 @@ const XIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
 );
 
-export default function Sidebar() {
+interface SidebarProps {
+    userProfile?: {
+        first_name: string | null;
+        last_name: string | null;
+    } | null;
+}
+
+export default function Sidebar({ userProfile }: SidebarProps) {
+    const supabase = createClient();
     const [isOpen, setIsOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
@@ -134,10 +142,20 @@ export default function Sidebar() {
                     </Link>
                 </nav>
 
-                <button onClick={handleLogout} className={styles.logoutBtn}>
-                    <LogOutIcon />
-                    <span>Odhlásit se</span>
-                </button>
+                <div className="mt-auto px-4 pb-2">
+                    {userProfile && (
+                        <div className="mb-4 px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                            <p className="text-xs text-slate-400 font-medium mb-0.5">Přihlášen jako</p>
+                            <p className="text-sm font-semibold text-white truncate">
+                                {userProfile.first_name} {userProfile.last_name}
+                            </p>
+                        </div>
+                    )}
+                    <button onClick={handleLogout} className={styles.logoutBtn}>
+                        <LogOutIcon />
+                        <span>Odhlásit se</span>
+                    </button>
+                </div>
             </aside>
         </>
     );

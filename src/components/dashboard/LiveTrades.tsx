@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { getAccountData, getBinanceUserStreamKey, PositionItem } from '@/app/actions/trading';
 
 export default function LiveTrades({ onLoaded }: { onLoaded?: () => void }) {
+  const supabase = createClient();
   const [positions, setPositions] = useState<PositionItem[]>([]);
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);

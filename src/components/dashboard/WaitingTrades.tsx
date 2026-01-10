@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { getOpenOrders, OrderItem } from '@/app/actions/trading';
 
 export default function WaitingTrades({ onLoaded }: { onLoaded?: () => void }) {
+    const supabase = createClient();
     const [orders, setOrders] = useState<OrderItem[]>([]);
     const [loading, setLoading] = useState(true);
 

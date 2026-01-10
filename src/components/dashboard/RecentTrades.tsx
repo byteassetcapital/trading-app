@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/client';
 import { getRecentTrades, TradeItem } from '@/app/actions/trading';
 
 export default function RecentTrades({ onLoaded }: { onLoaded?: () => void }) {
+  const supabase = createClient();
   const [trades, setTrades] = useState<TradeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
