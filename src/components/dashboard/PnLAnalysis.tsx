@@ -14,13 +14,28 @@ import {
     ReferenceLine
 } from 'recharts';
 
-export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
+interface PnLAnalysisProps {
+    onLoaded?: () => void;
+    data?: DailyPnLData[];
+}
+
+export default function PnLAnalysis({ onLoaded, data: propData }: PnLAnalysisProps) {
     const supabase = createClient();
-    const [data, setData] = useState<DailyPnLData[]>([]);
-    const [days, setDays] = useState<number>(7);
-    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState<DailyPnLData[]>(propData || []);
+    const [days, setDays] = useState<number>(14);
+    const [loading, setLoading] = useState(!propData);
 
     useEffect(() => {
+        if (propData) {
+            setData(propData);
+            setLoading(false);
+            if (onLoaded) onLoaded();
+        }
+    }, [propData, onLoaded]);
+
+    useEffect(() => {
+        if (propData) return;
+
         let isMounted = true;
 
         async function fetchData() {
@@ -45,7 +60,7 @@ export default function PnLAnalysis({ onLoaded }: { onLoaded?: () => void }) {
         fetchData();
 
         return () => { isMounted = false; };
-    }, [days, onLoaded]);
+    }, [days, propData]);
 
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {

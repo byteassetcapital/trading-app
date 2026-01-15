@@ -20,13 +20,34 @@ const initialStats: StatItem[] = [
 
 const ASSETS = ['ALL', 'BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT', 'BTCUSDC', 'ETHUSDC'];
 
-export default function QuickStats({ onLoaded }: { onLoaded?: () => void }) {
+interface QuickStatsProps {
+  onLoaded?: () => void;
+  data?: QuickStatsData; // Optional: if provided, use this instead of fetching
+}
+
+export default function QuickStats({ onLoaded, data: propData }: QuickStatsProps) {
   const supabase = createClient();
   const [stats, setStats] = useState<StatItem[]>(initialStats);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!propData); // Don't load if data provided
   const [assetFilter, setAssetFilter] = useState('ALL');
 
+  // If data is provided via props, use it directly
   useEffect(() => {
+    if (propData) {
+      setStats([
+        { label: 'Win Rate', value: propData.winRate, icon: '📈' },
+        { label: 'Total Trades', value: propData.totalTrades, icon: '⚡' },
+        { label: 'Best Trade', value: propData.bestTrade, icon: '🏆' },
+      ]);
+      setLoading(false);
+      if (onLoaded) onLoaded();
+    }
+  }, [propData, onLoaded]);
+
+  // Fetch data only if not provided via props
+  useEffect(() => {
+    if (propData) return; // Skip fetch if data provided
+
     let isMounted = true;
 
     async function fetchData() {
@@ -34,7 +55,6 @@ export default function QuickStats({ onLoaded }: { onLoaded?: () => void }) {
       try {
         const { data: { session } } = await supabase.auth.getSession();
 
-        // If not logged in, we might want to just show placeholders or return
         if (!session?.access_token) {
           setLoading(false);
           return;
@@ -61,7 +81,7 @@ export default function QuickStats({ onLoaded }: { onLoaded?: () => void }) {
     fetchData();
 
     return () => { isMounted = false; };
-  }, [assetFilter]);
+  }, [assetFilter, propData]);
 
   return (
     <div className="quick-stats-container">

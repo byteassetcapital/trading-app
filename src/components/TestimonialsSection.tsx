@@ -3,86 +3,86 @@
 import React from 'react';
 
 const testimonials = [
-    {
-        id: 1,
-        text: "Konečně trading bez stresu. AI se drží plánu, který bych já porušil při prvním poklesu. Vidět portfolio růst bez mých zásahů je osvobozující.",
-        author: "Petr Novák",
-        role: "IT Specialista",
-        gradient: "linear-gradient(135deg, #2D0A10 0%, #0D0105 100%)"
-    },
-    {
-        id: 2,
-        text: "Sleduju to už 3 měsíce a ta konzistence je neuvěřitelná. Žádné FOMO, prostě výsledky. Systém obchoduje přesně tak, jak slibovali.",
-        author: "Jana Králová",
-        role: "Podnikatelka",
-        gradient: "linear-gradient(135deg, #46212C 0%, #0D0105 100%)"
-    },
-    {
-        id: 3,
-        text: "Dlouho jsem hledal něco, co funguje skutečně pasivně. Jedem Trading mi ušetřil hodiny času denně, které bych jinak strávil u grafů.",
-        author: "Martin Svoboda",
-        role: "Investor",
-        gradient: "linear-gradient(135deg, #130307 0%, #2D0A10 100%)"
-    },
-    {
-        id: 4,
-        text: "Nejlepší rozhodnutí pro mé portfolio. Diverzifikace do algoritmického tradingu mi dává smysl, zvlášť v tak volatilním prostředí jako je krypto.",
-        author: "Tomáš Dvořák",
-        role: "Architekt",
-        gradient: "linear-gradient(135deg, #2D0A10 0%, #46212C 100%)"
-    },
-    {
-        id: 5,
-        text: "Líbí se mi transparentnost. Vím přesně, co se děje, ale nemusím do toho zasahovat. Reporty jsou jasné a přehledné.",
-        author: "Lucie Veselá",
-        role: "Marketing Manager",
-        gradient: "linear-gradient(135deg, #0D0105 0%, #2D0A10 100%)"
-    },
-    {
-        id: 6,
-        text: "Výkonostně stabilní, support funguje skvěle. Nemám co vytknout. Doporučuji každému, kdo chce zhodnotit kapitál bez emocí.",
-        author: "David Procházka",
-        role: "Trader",
-        gradient: "linear-gradient(135deg, #46212C 0%, #130307 100%)"
-    }
+  {
+    id: 1,
+    text: "Konečně trading bez stresu. AI se drží plánu, který bych já porušil při prvním poklesu. Vidět portfolio růst bez mých zásahů je osvobozující.",
+    author: "Karel",
+    role: "IT Specialista",
+    gradient: "linear-gradient(135deg, #2D0A10 0%, #0D0105 100%)"
+  },
+  {
+    id: 2,
+    text: "Sleduju to už 3 měsíce a ta konzistence je neuvěřitelná. Žádné FOMO, prostě výsledky. Systém obchoduje přesně tak, jak slibovali.",
+    author: "Sofie",
+    role: "Podnikatelka",
+    gradient: "linear-gradient(135deg, #46212C 0%, #0D0105 100%)"
+  },
+  {
+    id: 3,
+    text: "Dlouho jsem hledal něco, co funguje skutečně pasivně. Jedem Trading mi ušetřil hodiny času denně, které bych jinak strávil u grafů.",
+    author: "Martin",
+    role: "Investor",
+    gradient: "linear-gradient(135deg, #130307 0%, #2D0A10 100%)"
+  },
+  {
+    id: 4,
+    text: "Nejlepší rozhodnutí pro mé portfolio. Diverzifikace do algoritmického tradingu mi dává smysl, zvlášť v tak volatilním prostředí jako je krypto.",
+    author: "Lukáš",
+    role: "Architekt",
+    gradient: "linear-gradient(135deg, #2D0A10 0%, #46212C 100%)"
+  },
+  {
+    id: 5,
+    text: "Líbí se mi transparentnost. Vím přesně, co se děje, ale nemusím do toho zasahovat. Reporty jsou jasné a přehledné.",
+    author: "Aneta",
+    role: "Marketing Manager",
+    gradient: "linear-gradient(135deg, #0D0105 0%, #2D0A10 100%)"
+  },
+  {
+    id: 6,
+    text: "Výkonostně stabilní, support funguje skvěle. Nemám co vytknout. Doporučuji každému, kdo chce zhodnotit kapitál bez emocí.",
+    author: "Erik",
+    role: "Trader",
+    gradient: "linear-gradient(135deg, #46212C 0%, #130307 100%)"
+  }
 ];
 
 export default function TestimonialsSection() {
-    return (
-        <section className="testimonials-section">
-            <div className="section-header">
-                <h2 className="title">Co říkají naši klienti</h2>
-                <p className="subtitle">Přidejte se k investorům, kteří obchodují chytřeji.</p>
+  return (
+    <section className="testimonials-section">
+      <div className="section-header">
+        <h2 className="title">Co říkají naši early access investoři</h2>
+        <p className="subtitle">Přidejte se k early access investorům, kteří obchodují chytřeji.</p>
+      </div>
+
+      <div className="masonry-grid">
+        {testimonials.map((item) => (
+          <div key={item.id} className="testimonial-card">
+            {/* Quote Icon */}
+            <div className="quote-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 11L8 6H6C6 8.21 7.79 10 10 10V11ZM10 11H8V18H14V11H10ZM18 11L16 6H14C14 8.21 15.79 10 18 10V11ZM18 11H16V18H22V11H18Z" fill="currentColor" />
+              </svg>
             </div>
 
-            <div className="masonry-grid">
-                {testimonials.map((item) => (
-                    <div key={item.id} className="testimonial-card">
-                        {/* Quote Icon */}
-                        <div className="quote-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M10 11L8 6H6C6 8.21 7.79 10 10 10V11ZM10 11H8V18H14V11H10ZM18 11L16 6H14C14 8.21 15.79 10 18 10V11ZM18 11H16V18H22V11H18Z" fill="currentColor" />
-                            </svg>
-                        </div>
+            <p className="testimonial-text">"{item.text}"</p>
 
-                        <p className="testimonial-text">"{item.text}"</p>
-
-                        <div className="author-block">
-                            <div className="avatar-placeholder">
-                                {item.author.charAt(0)}
-                            </div>
-                            <div className="author-info">
-                                <span className="name">{item.author}</span>
-                                <span className="role">{item.role}</span>
-                            </div>
-                        </div>
-
-                        <div className="card-glow" style={{ background: item.gradient }}></div>
-                    </div>
-                ))}
+            <div className="author-block">
+              <div className="avatar-placeholder">
+                {item.author.charAt(0)}
+              </div>
+              <div className="author-info">
+                <span className="name">{item.author}</span>
+                <span className="role">{item.role}</span>
+              </div>
             </div>
 
-            <style jsx>{`
+            <div className="card-glow" style={{ background: item.gradient }}></div>
+          </div>
+        ))}
+      </div>
+
+      <style jsx>{`
         .testimonials-section {
           width: 100%;
           padding: 4rem 1.5rem;
@@ -241,6 +241,6 @@ export default function TestimonialsSection() {
           }
         }
       `}</style>
-        </section>
-    );
+    </section>
+  );
 }

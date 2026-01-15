@@ -4,18 +4,35 @@ import React, { useEffect, useState, useRef } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getAccountData, getBinanceUserStreamKey, PositionItem } from '@/app/actions/trading';
 
-export default function LiveTrades({ onLoaded }: { onLoaded?: () => void }) {
+interface LiveTradesProps {
+  onLoaded?: () => void;
+  data?: PositionItem[];
+}
+
+export default function LiveTrades({ onLoaded, data: propData }: LiveTradesProps) {
   const supabase = createClient();
-  const [positions, setPositions] = useState<PositionItem[]>([]);
+  const [positions, setPositions] = useState<PositionItem[]>(propData || []);
   const [prices, setPrices] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!propData);
   const [isWsConnected, setIsWsConnected] = useState(false);
 
   // Ref for positions to access current state in WS callback
-  const positionsRef = useRef<PositionItem[]>([]);
+  const positionsRef = useRef<PositionItem[]>(propData || []);
 
-  // 1. Fetch initial positions
+  // If data provided via props, use it
   useEffect(() => {
+    if (propData) {
+      setPositions(propData);
+      positionsRef.current = propData;
+      setLoading(false);
+      if (onLoaded) onLoaded();
+    }
+  }, [propData, onLoaded]);
+
+  // 1. Fetch initial positions only if not provided
+  useEffect(() => {
+    if (propData) return;
+
     async function fetchInitialData() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -34,7 +51,7 @@ export default function LiveTrades({ onLoaded }: { onLoaded?: () => void }) {
       }
     }
     fetchInitialData();
-  }, []);
+  }, [propData]);
 
   // 2. Connect to Streams (User Data & Market Price)
   useEffect(() => {

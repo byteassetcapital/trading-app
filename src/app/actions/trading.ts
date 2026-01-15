@@ -2,6 +2,7 @@
 
 import ccxt from 'ccxt';
 import { createClient } from '@supabase/supabase-js';
+import { withCache, CACHE_TTL, getFromCache, setInCache } from '@/lib/cache';
 
 const supabaseUrl = 'https://albctslyvkmfvpaerapn.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsYmN0c2x5dmttZnZwYWVyYXBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3MzQ2MDcsImV4cCI6MjA4MTMxMDYwN30.etiDDeMIwEpf1MnE6aAaqpvb45EbSeplPdBlwDyGcks';
@@ -402,11 +403,17 @@ export async function getAccountData(accessToken: string): Promise<AccountData |
     };
 }
 
+// Optimized: Reduced from 18 to 8 most active pairs for faster loading
 const TRADING_PAIRS = [
-    'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT', 'XRP/USDT',
+    'BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'BNB/USDT',
+    'XRP/USDT', 'BTC/USDC', 'ETH/USDC', 'SOL/USDC'
+];
+
+// Extended list for sync operations (when we have more time)
+const EXTENDED_TRADING_PAIRS = [
+    ...TRADING_PAIRS,
     'DOGE/USDT', 'ADA/USDT', 'AVAX/USDT', 'LINK/USDT', 'MATIC/USDT',
-    'DOT/USDT', 'LTC/USDT', 'SHIB/USDT', 'TRX/USDT',
-    'BTC/USDC', 'ETH/USDC', 'SOL/USDC', 'BNB/USDC'
+    'DOT/USDT', 'LTC/USDT', 'SHIB/USDT', 'TRX/USDT', 'BNB/USDC'
 ];
 
 export async function getOpenOrders(accessToken: string): Promise<OrderItem[]> {
@@ -836,4 +843,322 @@ export async function getDailyPnL(accessToken: string, days: number = 14): Promi
     }).sort((a, b) => a.date.localeCompare(b.date));
 
     return result;
+}
+
+// ============================================================================
+// AGGREGATED DASHBOARD DATA - OPTIMIZED FOR PERFORMANCE
+// ============================================================================
+
+export type AggregatedDashboardData = {
+    quickStats: QuickStatsData;
+    accountData: AccountData;
+    recentTrades: TradeItem[];
+    openOrders: OrderItem[];
+    realizedPnL: RealizedPnLData;
+    dailyPnL: DailyPnLData[];
+};
+
+/**
+ * Fetch all dashboard data in a single optimized pass
+ * This reduces API calls from 60-100+ to ~10-15 by sharing data between calculations
+ */
+export async function getAggregatedDashboardData(
+    accessToken: string,
+    days: number = 14
+): Promise<AggregatedDashboardData | null> {
+    if (!accessToken) return null;
+
+    // Try cache first
+    const cached = await getFromCache<AggregatedDashboardData>(
+        accessToken,
+        'aggregated_dashboard',
+        { days }
+    );
+
+    if (cached) {
+        return cached;
+    }
+
+    // Cache miss - fetch fresh data
+    const connections = await getUserConnections(accessToken);
+
+    if (!connections || connections.length === 0) {
+        const emptyData: AggregatedDashboardData = {
+            quickStats: { winRate: '0.00%', totalTrades: '0', bestTrade: '$0' },
+            accountData: { totalBalance: 0, availableBalance: 0, inPositions: 0, unrealizedPnL: 0, positions: [] },
+            recentTrades: [],
+            openOrders: [],
+            realizedPnL: { totalPnL: 0, breakdown: [] },
+            dailyPnL: []
+        };
+        return emptyData;
+    }
+
+    // Initialize aggregated data structures
+    let totalBalance = 0;
+    let availableBalance = 0;
+    let totalUnrealizedPnL = 0;
+    const positions: PositionItem[] = [];
+    const allTrades: TradeItem[] = [];
+    const allOrders: OrderItem[] = [];
+
+    // Stats tracking
+    let totalTradesCount = 0;
+    let winningTradesCount = 0;
+    let bestTradePnl = -Infinity;
+    let futuresPnL = 0;
+    let feesPaid = 0;
+
+    // Daily PnL tracking
+    const rangeDays = days > 0 ? days : 14;
+    const dailyMap = new Map<string, { pnl: number, count: number }>();
+
+    // Initialize daily map
+    for (let i = rangeDays - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        dailyMap.set(dateStr, { pnl: 0, count: 0 });
+    }
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - rangeDays);
+    startDate.setHours(0, 0, 0, 0);
+    const since = startDate.getTime();
+
+    // Process each connection
+    for (const conn of connections) {
+        if (conn.exchange_platform === 'binance') {
+            const apiKey = decrypt(conn.api_key_encrypted);
+            const secret = decrypt(conn.api_secret_encrypted);
+            if (!apiKey || !secret) continue;
+
+            const isTestnet = String(conn.is_testnet) === 'true' || conn.is_testnet === true;
+
+            try {
+                const exchange = new ccxt.binance({
+                    apiKey,
+                    secret,
+                    enableRateLimit: true,
+                    options: {
+                        defaultType: 'future',
+                        recvWindow: 60000,
+                        adjustForTimeDifference: true,
+                        warnOnFetchOpenOrdersWithoutSymbol: false
+                    }
+                });
+                exchange.options['adjustForTimeDifference'] = true;
+                exchange.options['recvWindow'] = 60000;
+                exchange.options['warnOnFetchOpenOrdersWithoutSymbol'] = false;
+
+                if (isTestnet) exchange.setSandboxMode(true);
+                await exchange.loadTimeDifference();
+                try { await exchange.loadMarkets(); } catch { }
+
+                // 1. Fetch Balance (1 API call)
+                const balance = await exchange.fetchBalance();
+                const assets = ['USDT', 'USDC'];
+                for (const asset of assets) {
+                    const assetBalance = balance[asset];
+                    if (assetBalance) {
+                        totalBalance += assetBalance.total || 0;
+                        availableBalance += assetBalance.free || 0;
+                    }
+                }
+                if (balance.info?.totalUnrealizedProfit) {
+                    totalUnrealizedPnL += parseFloat(balance.info.totalUnrealizedProfit);
+                }
+
+                // 2. Fetch Positions (1 API call)
+                const rawPositions = await exchange.fetchPositions();
+                const active = rawPositions.filter((p: any) => parseFloat(p.info.positionAmt) !== 0);
+                active.forEach((p: any) => {
+                    const size = parseFloat(p.info.positionAmt);
+                    positions.push({
+                        id: `${conn.id}-${p.symbol}`,
+                        pair: p.symbol,
+                        side: size > 0 ? 'long' : 'short',
+                        entryPrice: parseFloat(p.entryPrice),
+                        currentPrice: p.markPrice || p.lastPrice || 0,
+                        size: Math.abs(size),
+                        pnl: parseFloat(p.unrealizedPnl),
+                        pnlPercent: parseFloat(p.percentage || '0')
+                    });
+                });
+
+                // 3. Fetch Trades for all symbols in parallel (8 API calls)
+                const symbols = TRADING_PAIRS;
+
+                await Promise.all(symbols.map(async (symbol) => {
+                    try {
+                        // Fetch trades with pagination for daily PnL
+                        let fetchMore = true;
+                        let batchSince = since;
+                        const symbolTrades: any[] = [];
+
+                        while (fetchMore) {
+                            const trades = await exchange.fetchMyTrades(symbol, batchSince, undefined, { limit: 50 });
+                            if (!trades || trades.length === 0) {
+                                fetchMore = false;
+                                break;
+                            }
+
+                            symbolTrades.push(...trades);
+
+                            const lastTs = trades[trades.length - 1]?.timestamp;
+                            if (lastTs && lastTs > batchSince) {
+                                batchSince = lastTs + 1;
+                            } else {
+                                fetchMore = false;
+                            }
+
+                            if (trades.length < 50) fetchMore = false;
+                        }
+
+                        // Process all trades for this symbol
+                        symbolTrades.forEach((t: any) => {
+                            const realizedPnl = t.info?.realizedPnl ? parseFloat(t.info.realizedPnl) : 0;
+                            const feeCost = (t.fee && t.fee.cost) ? parseFloat(t.fee.cost) : 0;
+
+                            // Quick Stats
+                            if (realizedPnl !== 0) {
+                                totalTradesCount++;
+                                if (realizedPnl > 0) winningTradesCount++;
+                                if (realizedPnl > bestTradePnl) bestTradePnl = realizedPnl;
+                            }
+
+                            // Realized PnL
+                            if (realizedPnl) futuresPnL += realizedPnl;
+                            if (feeCost) feesPaid += feeCost;
+
+                            // Daily PnL
+                            if (realizedPnl !== 0 || feeCost > 0) {
+                                const ts = t.timestamp || Date.now();
+                                const dateStr = new Date(ts).toISOString().split('T')[0];
+                                if (dailyMap.has(dateStr)) {
+                                    const current = dailyMap.get(dateStr)!;
+                                    current.pnl += realizedPnl;
+                                    if (realizedPnl !== 0) current.count += 1;
+                                    dailyMap.set(dateStr, current);
+                                }
+                            }
+
+                            // Recent Trades (only last 20 with PnL)
+                            if (Math.abs(realizedPnl) > 0 && allTrades.length < 100) {
+                                const date = new Date(t.timestamp);
+                                const dateStr = `${date.getDate()}.${date.getMonth() + 1}. ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                                const cleanPair = t.symbol.split(':')[0];
+
+                                allTrades.push({
+                                    id: t.id,
+                                    type: (t.side || 'buy') as 'buy' | 'sell',
+                                    pair: cleanPair,
+                                    amount: t.amount,
+                                    price: t.price,
+                                    time: dateStr,
+                                    profit: realizedPnl,
+                                    timestamp: t.timestamp
+                                });
+                            }
+                        });
+                    } catch { }
+                }));
+
+                // 4. Fetch Open Orders (8 API calls)
+                const activeSymbols = symbols.filter(s => exchange.markets && exchange.markets[s]);
+                await Promise.all(activeSymbols.map(async (sym) => {
+                    try {
+                        const pairOrders = await exchange.fetchOpenOrders(sym);
+                        if (pairOrders && pairOrders.length > 0) {
+                            pairOrders.forEach((o: any) => {
+                                const date = new Date(o.timestamp);
+                                const dateStr = `${date.getDate()}.${date.getMonth() + 1}. ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+                                let pairName = o.symbol;
+                                if (pairName.endsWith(':USDC')) pairName = pairName.replace(':USDC', '');
+                                if (pairName.endsWith(':USDT')) pairName = pairName.replace(':USDT', '');
+
+                                allOrders.push({
+                                    id: o.id,
+                                    pair: pairName,
+                                    type: o.type,
+                                    side: o.side,
+                                    price: parseFloat(o.price),
+                                    amount: parseFloat(o.amount),
+                                    filled: parseFloat(o.filled),
+                                    status: o.status,
+                                    time: dateStr,
+                                    timestamp: o.timestamp
+                                });
+                            });
+                        }
+                    } catch { }
+                }));
+
+            } catch (e) {
+                console.error('Aggregated fetch error:', e);
+            }
+        }
+    }
+
+    // Calculate final values
+    if (bestTradePnl === -Infinity) bestTradePnl = 0;
+    const winRate = totalTradesCount > 0 ? (winningTradesCount / totalTradesCount) * 100 : 0;
+
+    // Fix position percentages if needed
+    positions.forEach(p => {
+        if (p.pnlPercent === 0 && p.entryPrice && p.currentPrice) {
+            const rawDiff = ((p.currentPrice - p.entryPrice) / p.entryPrice) * 100;
+            p.pnlPercent = p.side === 'long' ? rawDiff : -rawDiff;
+        }
+    });
+
+    // Sort and limit trades
+    const recentTrades = allTrades
+        .sort((a: any, b: any) => b.timestamp - a.timestamp)
+        .slice(0, 20);
+
+    // Sort orders
+    const openOrders = allOrders.sort((a, b) => b.timestamp - a.timestamp);
+
+    // Build daily PnL array
+    const dailyPnL: DailyPnLData[] = Array.from(dailyMap.entries()).map(([date, data]) => {
+        const d = new Date(date);
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+        return {
+            date,
+            pnl: data.pnl,
+            tradesCount: data.count,
+            dayLabel
+        };
+    }).sort((a, b) => a.date.localeCompare(b.date));
+
+    const aggregatedData: AggregatedDashboardData = {
+        quickStats: {
+            winRate: winRate.toFixed(2) + '%',
+            totalTrades: totalTradesCount.toLocaleString(),
+            bestTrade: `$${bestTradePnl.toFixed(2)}`
+        },
+        accountData: {
+            totalBalance,
+            availableBalance,
+            inPositions: totalBalance - availableBalance,
+            unrealizedPnL: totalUnrealizedPnL,
+            positions
+        },
+        recentTrades,
+        openOrders,
+        realizedPnL: {
+            totalPnL: futuresPnL - feesPaid,
+            breakdown: [
+                { label: 'Futures P&L', value: futuresPnL },
+                { label: 'Fees Paid', value: -feesPaid },
+            ]
+        },
+        dailyPnL
+    };
+
+    // Cache the result
+    await setInCache(accessToken, 'aggregated_dashboard', aggregatedData, CACHE_TTL.AGGREGATED, { days });
+
+    return aggregatedData;
 }

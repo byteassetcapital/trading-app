@@ -4,12 +4,27 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getOpenOrders, OrderItem } from '@/app/actions/trading';
 
-export default function WaitingTrades({ onLoaded }: { onLoaded?: () => void }) {
+interface WaitingTradesProps {
+    onLoaded?: () => void;
+    data?: OrderItem[];
+}
+
+export default function WaitingTrades({ onLoaded, data: propData }: WaitingTradesProps) {
     const supabase = createClient();
-    const [orders, setOrders] = useState<OrderItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [orders, setOrders] = useState<OrderItem[]>(propData || []);
+    const [loading, setLoading] = useState(!propData);
+
+    useEffect(() => {
+        if (propData) {
+            setOrders(propData);
+            setLoading(false);
+            if (onLoaded) onLoaded();
+        }
+    }, [propData, onLoaded]);
 
     const fetchData = async () => {
+        if (propData) return; // Skip if data provided
+
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.access_token) {
@@ -25,10 +40,12 @@ export default function WaitingTrades({ onLoaded }: { onLoaded?: () => void }) {
     };
 
     useEffect(() => {
+        if (propData) return;
+
         fetchData();
         const interval = setInterval(fetchData, 60000); // Update every 1 minute
         return () => clearInterval(interval);
-    }, []);
+    }, [propData]);
 
     if (loading) return <div className="glass-panel p-4">Loading open orders...</div>;
 

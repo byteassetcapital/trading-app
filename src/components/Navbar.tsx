@@ -20,9 +20,9 @@ export default function Navbar() {
 
       <div className={`nav-links ${isOpen ? 'active' : ''}`}>
         <Link href="/" onClick={() => setIsOpen(false)}>Home</Link>
-        <Link href="/register" onClick={() => setIsOpen(false)}>Register</Link>
-        <Link href="/login" onClick={() => setIsOpen(false)}>Login</Link>
-        <Link href="/dashboard" className="btnSecondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }} onClick={() => setIsOpen(false)}>
+        <Link href="/register" onClick={() => setIsOpen(false)} style={{ display: 'none' }}>Register</Link>
+        <Link href="/login" onClick={() => setIsOpen(false)} style={{ display: 'none' }}>Login</Link>
+        <Link href="/dashboard" className="btnSecondary" style={{ display: 'none', padding: '0.5rem 1rem', fontSize: '0.9rem' }} onClick={() => setIsOpen(false)}>
           Dashboard
         </Link>
       </div>

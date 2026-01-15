@@ -90,6 +90,7 @@ a:hover {
 
 .glow-text {
   text-shadow: 0 0 20px var(--primary-purple-glow);
+  color: white;
 }
 
 .gradient-text {
@@ -97,6 +98,7 @@ a:hover {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: white;
 }
 
 .btnPrimary {
@@ -136,6 +138,10 @@ a:hover {
   cursor: pointer;
   backdrop-filter: blur(5px);
   transition: all 0.3s ease;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 .btnSecondary:hover {

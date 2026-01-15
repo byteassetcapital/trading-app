@@ -4,12 +4,27 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getRecentTrades, TradeItem } from '@/app/actions/trading';
 
-export default function RecentTrades({ onLoaded }: { onLoaded?: () => void }) {
+interface RecentTradesProps {
+  onLoaded?: () => void;
+  data?: TradeItem[];
+}
+
+export default function RecentTrades({ onLoaded, data: propData }: RecentTradesProps) {
   const supabase = createClient();
-  const [trades, setTrades] = useState<TradeItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [trades, setTrades] = useState<TradeItem[]>(propData || []);
+  const [loading, setLoading] = useState(!propData);
 
   useEffect(() => {
+    if (propData) {
+      setTrades(propData);
+      setLoading(false);
+      if (onLoaded) onLoaded();
+    }
+  }, [propData, onLoaded]);
+
+  useEffect(() => {
+    if (propData) return;
+
     async function fetchTrades() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -29,7 +44,7 @@ export default function RecentTrades({ onLoaded }: { onLoaded?: () => void }) {
     // Poll every 5 seconds for new trades
     const interval = setInterval(fetchTrades, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [propData]);
 
   if (loading) return <div className="recent-trades glass-panel p-4">Loading trades...</div>;
 

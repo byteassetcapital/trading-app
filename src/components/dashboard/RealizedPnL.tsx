@@ -4,12 +4,27 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getRealizedPnLStats, RealizedPnLData } from '@/app/actions/trading';
 
-export default function RealizedPnL({ onLoaded }: { onLoaded?: () => void }) {
+interface RealizedPnLProps {
+  onLoaded?: () => void;
+  data?: RealizedPnLData;
+}
+
+export default function RealizedPnL({ onLoaded, data: propData }: RealizedPnLProps) {
   const supabase = createClient();
-  const [data, setData] = useState<RealizedPnLData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<RealizedPnLData | null>(propData || null);
+  const [loading, setLoading] = useState(!propData);
 
   useEffect(() => {
+    if (propData) {
+      setData(propData);
+      setLoading(false);
+      if (onLoaded) onLoaded();
+    }
+  }, [propData, onLoaded]);
+
+  useEffect(() => {
+    if (propData) return;
+
     async function fetchData() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -25,7 +40,7 @@ export default function RealizedPnL({ onLoaded }: { onLoaded?: () => void }) {
       }
     }
     fetchData();
-  }, []);
+  }, [propData]);
 
   if (loading) return <div className="realized-pnl glass-panel p-4">Loading PnL...</div>;
 

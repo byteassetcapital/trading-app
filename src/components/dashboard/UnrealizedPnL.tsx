@@ -4,13 +4,28 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getAccountData, PositionItem } from '@/app/actions/trading';
 
-export default function UnrealizedPnL({ onLoaded }: { onLoaded?: () => void }) {
+interface UnrealizedPnLProps {
+  onLoaded?: () => void;
+  data?: number; // Unrealized PnL value
+}
+
+export default function UnrealizedPnL({ onLoaded, data: propData }: UnrealizedPnLProps) {
   const supabase = createClient();
   const [positions, setPositions] = useState<PositionItem[]>([]);
-  const [totalPnL, setTotalPnL] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [totalPnL, setTotalPnL] = useState(propData || 0);
+  const [loading, setLoading] = useState(!propData && propData !== 0);
 
   useEffect(() => {
+    if (propData !== undefined) {
+      setTotalPnL(propData);
+      setLoading(false);
+      if (onLoaded) onLoaded();
+    }
+  }, [propData, onLoaded]);
+
+  useEffect(() => {
+    if (propData !== undefined) return;
+
     async function fetchData() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -29,7 +44,7 @@ export default function UnrealizedPnL({ onLoaded }: { onLoaded?: () => void }) {
       }
     }
     fetchData();
-  }, []);
+  }, [propData]);
 
   const isPositive = totalPnL >= 0;
 

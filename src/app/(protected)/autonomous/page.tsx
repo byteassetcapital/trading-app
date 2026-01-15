@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
 import Loader from "@/components/Loader";
 import UserDisplay from "@/components/UserDisplay";
 import SecondaryNav from "@/components/autonomous/SecondaryNav";
@@ -21,115 +23,164 @@ import {
   MainChart,
 } from "@/components/dashboard";
 
-export default function AutonomousPage() {
-  const [activeSection, setActiveSection] = useState('overview');
+import { getAggregatedDashboardData, type AggregatedDashboardData } from '@/app/actions/trading';
 
-  // Dashboard Loading States
-  const [loadingStates, setLoadingStates] = useState({
-    quickStats: true,
-    liveTrades: true,
-    waitingTrades: true,
-    watchlist: true,
-    unrealizedPnL: true,
-    realizedPnL: true,
-    accountBalance: true,
-    activeBots: true,
-    recentTrades: true,
-  });
+export default function AutonomousPage() {
+  const router = useRouter();
+  const [activeSection, setActiveSection] = useState('overview');
+  const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<AggregatedDashboardData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Bot Settings Dummy State
   const [bots, setBots] = useState([
     { id: 1, name: 'BTC Notch', active: true },
     { id: 2, name: 'BTC HFT Algo', active: false },
     { id: 3, name: 'SOL Multi Trader', active: true },
-
   ]);
-
-  const handleLoaded = (key: keyof typeof loadingStates) => {
-    setLoadingStates(prev => ({ ...prev, [key]: false }));
-  };
-
-  const isFullyLoaded = !Object.values(loadingStates).some(state => state);
 
   const toggleBot = (id: number) => {
     setBots(bots.map(b => b.id === id ? { ...b, active: !b.active } : b));
   };
 
+  // Fetch all dashboard data on mount
+  useEffect(() => {
+    if (activeSection !== 'overview') return;
+
+    const fetchDashboardData = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session?.access_token) {
+          router.push('/login');
+          return;
+        }
+
+        // Single aggregated fetch - replaces 6+ individual API calls
+        const data = await getAggregatedDashboardData(session.access_token, 14);
+
+        if (data) {
+          setDashboardData(data);
+        } else {
+          setError('Failed to load dashboard data');
+        }
+      } catch (err) {
+        console.error('Dashboard fetch error:', err);
+        setError('An error occurred while loading data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [activeSection, router]);
 
   // Render Functions
-  const renderOverview = () => (
-    <>
-      <section className="section-quick-stats">
-        <QuickStats onLoaded={() => handleLoaded('quickStats')} />
-      </section>
+  const renderOverview = () => {
+    if (isLoading) {
+      return <Loader />;
+    }
 
-      <div className="grid-item pnl-area" style={{ marginBottom: '1.5rem' }}>
-        <div className="pnl-grid">
-          <UnrealizedPnL onLoaded={() => handleLoaded('unrealizedPnL')} />
-          <RealizedPnL onLoaded={() => handleLoaded('realizedPnL')} />
-          <AccountBalance onLoaded={() => handleLoaded('accountBalance')} />
-          <PnLAnalysis />
+    if (error) {
+      return (
+        <div style={{ padding: '2rem', textAlign: 'center', color: '#ff4444' }}>
+          <p>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ marginTop: '1rem', padding: '0.5rem 1rem', cursor: 'pointer' }}
+          >
+            Retry
+          </button>
         </div>
-      </div>
+      );
+    }
 
-      <div className="grid-item live-trades-area" style={{ marginBottom: '1.5rem' }}>
-        <LiveTrades onLoaded={() => handleLoaded('liveTrades')} />
-      </div>
+    if (!dashboardData) {
+      return (
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>No data available</p>
+        </div>
+      );
+    }
 
-      <div className="grid-item waiting-trades-area">
-        <WaitingTrades onLoaded={() => handleLoaded('waitingTrades')} />
-      </div>
+    return (
+      <>
+        <section className="section-quick-stats">
+          <QuickStats data={dashboardData.quickStats} />
+        </section>
 
-      <div className="charts-stack" style={{ display: 'none' }}>
-        <MainChart />
-        <Watchlist onLoaded={() => handleLoaded('watchlist')} />
-      </div>
+        <div className="grid-item pnl-area" style={{ marginBottom: '1.5rem' }}>
+          <div className="pnl-grid">
+            <UnrealizedPnL data={dashboardData.accountData.unrealizedPnL} />
+            <RealizedPnL data={dashboardData.realizedPnL} />
+            <AccountBalance data={dashboardData.accountData.totalBalance} />
+            <PnLAnalysis data={dashboardData.dailyPnL} />
+          </div>
+        </div>
 
-      <div className="grid-item trades-area" style={{ paddingTop: '1.5rem' }}>
-        <RecentTrades onLoaded={() => handleLoaded('recentTrades')} />
-      </div>
+        <div className="grid-item live-trades-area" style={{ marginBottom: '1.5rem' }}>
+          <LiveTrades data={dashboardData.accountData.positions} />
+        </div>
 
-      <div className="grid-item bots-area">
-        <ActiveBots onLoaded={() => handleLoaded('activeBots')} />
-      </div>
+        <div className="grid-item waiting-trades-area">
+          <WaitingTrades data={dashboardData.openOrders} />
+        </div>
 
-      {/* Preservation of original styles for grid layout */}
-      <style jsx>{`
-        .bg-glow-1, .bg-glow-2 {
-          position: fixed;
-          width: 400px;
-          height: 400px;
-          border-radius: 50%;
-          filter: blur(80px);
-          z-index: -1;
-          opacity: 0.15;
-          pointer-events: none;
-        }
-        .bg-glow-1 { background: #3f5efb; top: 10%; left: -10%; }
-        .bg-glow-2 { background: #fc466b; bottom: 10%; right: -10%; }
+        <div className="charts-stack" style={{ display: 'none' }}>
+          <MainChart />
+          <Watchlist onLoaded={() => { }} />
+        </div>
 
-        .section-quick-stats { margin-bottom: 1.5rem; }
-        
-        /* Original Mobile First Styles */
-        .grid-item { width: 100%; }
-        .pnl-grid { display: flex; flex-direction: column; gap: 1rem; }
-        
-        @media (min-width: 768px) {
-           .pnl-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
-           .dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-        }
+        <div className="grid-item trades-area" style={{ paddingTop: '1.5rem' }}>
+          <RecentTrades data={dashboardData.recentTrades} />
+        </div>
 
-        @media (min-width: 1024px) {
-           .dash-grid { display: grid; grid-template-columns: 350px 1fr; grid-template-rows: auto auto; gap: 12px; }
-           .pnl-area { grid-column: 1 / -1; grid-row: 2 / 3; width: 100%; }
-           .pnl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; }
-           .bots-area { grid-column: 1 / -1; grid-row: 3 / 4; padding-top: 1.5rem; }
-        }
-        
-        .charts-stack { display: flex; flex-direction: column; gap: 1.25rem; }
-      `}</style>
-    </>
-  );
+        <div className="grid-item bots-area">
+          <ActiveBots onLoaded={() => { }} />
+        </div>
+
+        {/* Preservation of original styles for grid layout */}
+        <style jsx>{`
+          .bg-glow-1, .bg-glow-2 {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+          }
+          .bg-glow-1 { background: #3f5efb; top: 10%; left: -10%; }
+          .bg-glow-2 { background: #fc466b; bottom: 10%; right: -10%; }
+
+          .section-quick-stats { margin-bottom: 1.5rem; }
+          
+          /* Original Mobile First Styles */
+          .grid-item { width: 100%; }
+          .pnl-grid { display: flex; flex-direction: column; gap: 1rem; }
+          
+          @media (min-width: 768px) {
+             .pnl-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+             .dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+          }
+
+          @media (min-width: 1024px) {
+             .dash-grid { display: grid; grid-template-columns: 350px 1fr; grid-template-rows: auto auto; gap: 12px; }
+             .pnl-area { grid-column: 1 / -1; grid-row: 2 / 3; width: 100%; }
+             .pnl-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; width: 100%; }
+             .bots-area { grid-column: 1 / -1; grid-row: 3 / 4; padding-top: 1.5rem; }
+          }
+          
+          .charts-stack { display: flex; flex-direction: column; gap: 1.25rem; }
+        `}</style>
+      </>
+    );
+  };
 
   const renderTradingSettings = () => (
     <div className={styles.section}>
@@ -207,8 +258,6 @@ export default function AutonomousPage() {
       {/* Background Glows */}
       <div className="bg-glow-1"></div>
       <div className="bg-glow-2"></div>
-
-      {activeSection === 'overview' && !isFullyLoaded && <Loader />}
 
       <header className={styles.header}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>

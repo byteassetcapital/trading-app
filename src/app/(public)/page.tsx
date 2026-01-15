@@ -50,6 +50,7 @@ export default function Home() {
             borderColor: 'rgba(255, 255, 255, 0.1)',
             borderStyle: 'solid',
             marginTop: '20px',
+            marginBottom: '20px',
           }}>
             <video
               src="/vid.mp4"
@@ -60,7 +61,8 @@ export default function Home() {
               style={{
                 width: '100%',
                 height: '100%',
-                objectFit: 'cover'
+                objectFit: 'cover',
+                display: 'block' // Přidejte toto
               }}
             />
           </div>
@@ -96,8 +98,12 @@ export default function Home() {
         </div>
       </section >
 
+
       {/* FREE TRIAL BENEFITS SECTION */}
       <FreeTrialBenefits />
+
+
+
 
 
       <div className="hero-content">
@@ -276,7 +282,7 @@ export default function Home() {
               <div className="pill-badge">
                 <span className="icon">⚡</span> Emotion-Free Execution
               </div>
-              <h3>Automaticky exekvuje plán bez emoce</h3>
+              <h3>Automaticky vykonává plán bez emocí</h3>
               <p>Žádná chamtivost. Žádná panikaření. Žádná pomsta trhu. AI dodrží exit, protože nepodléhá stresu ani FOMO.</p>
             </div>
           </div>
@@ -301,18 +307,25 @@ export default function Home() {
 
       {/* TESTIMONIALS SECTION */}
       <TestimonialsSection />
-      <div >
+      <div style={{ display: "none" }}>
         {/* PRICING SECTION */}
         <PricingSection />
         <div className="important-info">
           <p>Všechny strategie jsou backtestovány na historických datech od 2015, live track record od 2023. Kapitál klienta je vždy segregován. Žádné skryté poplatky.</p>
         </div>
       </div>
-      <div style={{ display: 'none', justifyContent: 'center', alignItems: 'center', textAlign: 'center', maxHeight: '30vh', minHeight: '50vh', flexDirection: 'column' }} >
-
-        <h1> Zaregistrujte se k předběžnému přístupu a my Vás upozorníme!</h1>
 
 
+      <div id="early-access" style={{
+        display: 'flex',              /* Aktivuje Flexbox */
+        flexDirection: 'column',     /* Seřadí prvky pod sebe */
+        justifyContent: 'center',    /* Vycentruje vertikálně (v rámci výšky) */
+        alignItems: 'center',        /* Vycentruje horizontálně */
+        textAlign: 'center',         /* Vycentruje text uvnitř h1 */
+        minHeight: '50vh',           /* Minimální výška sekce */
+        width: '100%'                /* Aby se roztáhl na celou šířku */
+      }}>
+        <h1>Zaregistrujte se k předběžnému přístupu a my Vás upozorníme!</h1>
         <EarlyAccessForm />
       </div>
 

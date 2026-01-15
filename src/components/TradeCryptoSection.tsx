@@ -9,7 +9,7 @@ export default function TradeCryptoSection() {
         <p className="subtitle">Seamless. Secure. Smart.</p>
 
         <div className="cta-wrapper">
-          <Link href="/register" className="btnPrimary start-trading-btn">
+          <Link href="#early-access" className="btnPrimary start-trading-btn">
             START TRADING
           </Link>
         </div>

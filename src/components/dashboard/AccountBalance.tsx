@@ -4,12 +4,27 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { getAccountData, AccountData } from '@/app/actions/trading';
 
-export default function AccountBalance({ onLoaded }: { onLoaded?: () => void }) {
+interface AccountBalanceProps {
+  onLoaded?: () => void;
+  data?: number; // Total balance
+}
+
+export default function AccountBalance({ onLoaded, data: propData }: AccountBalanceProps) {
   const supabase = createClient();
   const [data, setData] = useState<AccountData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!propData && propData !== 0);
 
   useEffect(() => {
+    if (propData !== undefined) {
+      setData({ totalBalance: propData, availableBalance: 0, inPositions: 0, unrealizedPnL: 0, positions: [] });
+      setLoading(false);
+      if (onLoaded) onLoaded();
+    }
+  }, [propData, onLoaded]);
+
+  useEffect(() => {
+    if (propData !== undefined) return;
+
     async function fetchBalance() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -25,7 +40,7 @@ export default function AccountBalance({ onLoaded }: { onLoaded?: () => void }) 
       }
     }
     fetchBalance();
-  }, []);
+  }, [propData]);
 
   if (loading) return <div className="account-balance glass-panel p-4">Loading balance...</div>;
 

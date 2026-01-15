@@ -49,9 +49,6 @@ export default function EarlyAccessForm() {
     return (
         <>
 
-            <div style={{ textAlign: 'center' }}>
-                <h2 style={{ fontSize: 'clamp(0.9rem, 30vw, 1rem)' }}> Zaregistrujte se k předběžnému přístupu a my Vás upozorníme!</h2>
-            </div>
             <form className="notifyForm" onSubmit={handleSubmit}>
                 {message && (
                     <div style={{ color: message.type === 'success' ? '#4caf50' : '#f44336', marginBottom: '1rem', textAlign: 'center' }}>
