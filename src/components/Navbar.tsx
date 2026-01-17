@@ -27,70 +27,7 @@ export default function Navbar() {
         </Link>
       </div>
 
-      <style jsx>{`
-        .navbar {
-          position: absolute;
-          top: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 90%;
-          max-width: 1200px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 1rem 2rem;
-          z-index: 1000;
-          border-radius: 50px;
-          transition: all 0.3s ease;
-        }
 
-        .logo { font-size: 1.5rem; font-weight: bold; color: white; z-index: 1001; }
-
-        .nav-links { display: flex; gap: 2rem; align-items: center; }
-
-        /* Mobilní menu - skryté tlačítko na desktopu */
-        .menu-toggle {
-          display: none;
-          background: none;
-          border: none;
-          cursor: pointer;
-          z-index: 1001;
-        }
-
-        .icon-hamburger::before { content: "☰"; color: white; font-size: 2rem; }
-        .icon-close::before { content: "✕"; color: white; font-size: 2rem; }
-
-        /* --- RESPONSIVE DESIGN --- */
-        @media (max-width: 768px) {
-          .menu-toggle { display: block; }
-
-          .nav-links {
-            display: none; /* Skryté ve výchozím stavu */
-            flex-direction: column;
-            position: absolute;
-            top: 100%; /* Hned pod navbarem */
-            left: 0;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.9); /* Tmavé pozadí pro mobilní menu */
-            backdrop-filter: blur(15px);
-            padding: 2rem;
-            border-radius: 20px;
-            margin-top: 10px;
-            gap: 1.5rem;
-          }
-
-          .nav-links.active {
-            display: flex; /* Zobrazit při kliknutí */
-          }
-          
-          .navbar.nav-open {
-            border-radius: 25px; /* Upravit tvar při otevření */
-          }
-        }
-
-        .nav-links :global(a:not(.btn-secondary)) { font-weight: 500; opacity: 0.8; color: white; text-decoration: none; }
-        .nav-links :global(a:not(.btn-secondary):hover) { opacity: 1; color: #E49EAC; }
-      `}</style>
     </nav>
   );
 }

@@ -33,7 +33,7 @@ export default function Home() {
             padding: '0 20px',
             rowGap: '0.7rem',
           }}>
-            <h1 className="h1">Autonomní AI Trading</h1>
+            <h1 className="h1">Tvůj AI Trading Bot, který vydělává, i když spíš</h1>
             <p className="subtitle2">
               Nový projekt s ambicí změnit způsob, jakým lidé investují do kryptoměn. Vyzkoušej zdarma na virtuálních penězích.
             </p>
